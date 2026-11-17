@@ -1290,7 +1290,7 @@ body[data-real="mobile"] #devToggle{display:none !important}
 [hidden]{display:none !important}
 
 </style>
-<meta name="qimu-version" content="22">
+<meta name="qimu-version" content="23">
 </head>
 <body data-device="desktop" data-tab="home">
 
@@ -1746,14 +1746,21 @@ body[data-real="mobile"] #devToggle{display:none !important}
    ══════════════════════════════════════════════════════════ */
 
 const SITES = [
-  // 暴风放第一位 = 默认源。用户实测它播放最稳，不要换。
-  // 它的 CDN 连接延迟偏高（实测 m3u8 1751ms），靠加大播放器缓冲来弥补。
-  { key: 'bf',   name: '暴风资源', api: 'https://bfzyapi.com/api.php/provide/vod/' },
-  { key: 'ff',   name: '非凡资源', api: 'https://cj.ffzyapi.com/api.php/provide/vod/at/json' },
+  // 顺序按 2026-11 实测排的：播放可用率 40% + 片量 35% + 接口速度 25%
+  //
+  //   量子    16.4万  673ms   5/5   ← 默认
+  //   索尼    14.9万  1477ms  5/5
+  //   极速    11.7万  1001ms  5/5
+  //   电影天堂 8.5万   608ms   5/5
+  //   非凡    9.9万   1427ms  5/5（分片最快 393ms）
+  //   最大资源 12.6万  983ms   1/5
+  //   暴风    17.3万  2093ms  0/5  ← 片量最多但域名全失效，放最后
   { key: 'lz',   name: '量子资源', api: 'https://cj.lziapi.com/api.php/provide/vod/' },
+  { key: 'ff',   name: '非凡资源', api: 'https://cj.ffzyapi.com/api.php/provide/vod/at/json' },
+  { key: 'sn',   name: '索尼资源', api: 'https://suoniapi.com/api.php/provide/vod/at/json/' },
   { key: 'js',   name: '极速资源', api: 'https://jszyapi.com/api.php/provide/vod/at/json' },
   { key: 'dytt', name: '电影天堂', api: 'https://caiji.dyttzyapi.com/api.php/provide/vod/' },
-  { key: 'sn',   name: '索尼资源', api: 'https://suoniapi.com/api.php/provide/vod/at/json/' },
+  { key: 'bf',   name: '暴风资源', api: 'https://bfzyapi.com/api.php/provide/vod/' },
   { key: 'zd',   name: '最大资源', api: 'https://api.zuidapi.com/api.php/provide/vod/' },
 ];
 
