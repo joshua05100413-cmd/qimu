@@ -1746,12 +1746,11 @@ body[data-real="mobile"] #devToggle{display:none !important}
    ══════════════════════════════════════════════════════════ */
 
 const SITES = [
-  // 量子放第一位 = 默认源。实测它的 CDN 连接延迟最低（528ms，暴风 1751ms），
-  // 起播和拖动都更快。「量子播放失败」的老问题已在 v19 修掉
-  // （它的第一条线路是 /share/ 网页地址，现在会优先挑 m3u8 直链线路）。
-  { key: 'lz',   name: '量子资源', api: 'https://cj.lziapi.com/api.php/provide/vod/' },
-  { key: 'ff',   name: '非凡资源', api: 'https://cj.ffzyapi.com/api.php/provide/vod/at/json' },
+  // 暴风放第一位 = 默认源。用户实测它播放最稳，不要换。
+  // 它的 CDN 连接延迟偏高（实测 m3u8 1751ms），靠加大播放器缓冲来弥补。
   { key: 'bf',   name: '暴风资源', api: 'https://bfzyapi.com/api.php/provide/vod/' },
+  { key: 'ff',   name: '非凡资源', api: 'https://cj.ffzyapi.com/api.php/provide/vod/at/json' },
+  { key: 'lz',   name: '量子资源', api: 'https://cj.lziapi.com/api.php/provide/vod/' },
   { key: 'js',   name: '极速资源', api: 'https://jszyapi.com/api.php/provide/vod/at/json' },
   { key: 'dytt', name: '电影天堂', api: 'https://caiji.dyttzyapi.com/api.php/provide/vod/' },
   { key: 'sn',   name: '索尼资源', api: 'https://suoniapi.com/api.php/provide/vod/at/json/' },
