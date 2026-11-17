@@ -1290,7 +1290,7 @@ body[data-real="mobile"] #devToggle{display:none !important}
 [hidden]{display:none !important}
 
 </style>
-<meta name="qimu-version" content="21">
+<meta name="qimu-version" content="22">
 </head>
 <body data-device="desktop" data-tab="home">
 
@@ -3813,6 +3813,27 @@ async function playEp(lineIdx, epIdx, isAuto) {
   if (!isDirect && !/\/api\/hls\?/i.test(url)) {
     say('这条线路是网页解析地址，换下一条…');
     onPlaybackError('not-media');
+    return;
+  }
+
+  // ── 起播前预检 ──
+  // 采集站的视频域名经常整片失效（实测暴风 6 部里 5 部的域名 DNS 都解析不了）。
+  // 不预检的话，播放器会去打一个死域名，等 11 秒超时才换源，表现就是「播一下就卡一下」。
+  // 这里先花最多 2 秒确认清单能拿到，拿不到立刻换线路/换源。
+  say(`检查线路「${line.name}」…`);
+  try {
+    const chk = new AbortController();
+    const chkTimer = setTimeout(() => chk.abort(), 2000);
+    const probeUrl = isM3u8 ? API.hls(url) : API.proxy(url);
+    const pr = await fetch(probeUrl, { signal: chk.signal, headers: { Range: 'bytes=0-2048' } });
+    clearTimeout(chkTimer);
+    if (!pr.ok) {
+      onPlaybackError('precheck:' + pr.status);
+      return;
+    }
+  } catch (e) {
+    // 超时或域名解析失败 —— 直接换，别让播放器去撞
+    if (token === S.playToken) onPlaybackError('precheck:' + (e.name === 'AbortError' ? 'timeout' : (e.cause?.code || 'fail')));
     return;
   }
 
