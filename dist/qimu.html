@@ -1290,7 +1290,7 @@ body[data-real="mobile"] #devToggle{display:none !important}
 [hidden]{display:none !important}
 
 </style>
-<meta name="qimu-version" content="20">
+<meta name="qimu-version" content="21">
 </head>
 <body data-device="desktop" data-tab="home">
 
@@ -1746,16 +1746,16 @@ body[data-real="mobile"] #devToggle{display:none !important}
    ══════════════════════════════════════════════════════════ */
 
 const SITES = [
-  // 暴风放第一位 = 默认源。播放线路最稳，这是第一优先级。
-  // 它的海报图床 p.bfp261112.com 在部分网络下解析不了，卡片会退化成带片名的占位图，
-  // 但不影响播放；海报兜底会去别的源借（能借到就借）。
-  { key: 'bf',   name: '暴风资源', api: 'https://bfzyapi.com/api.php/provide/vod/' },
+  // 量子放第一位 = 默认源。实测它的 CDN 连接延迟最低（528ms，暴风 1751ms），
+  // 起播和拖动都更快。「量子播放失败」的老问题已在 v19 修掉
+  // （它的第一条线路是 /share/ 网页地址，现在会优先挑 m3u8 直链线路）。
   { key: 'lz',   name: '量子资源', api: 'https://cj.lziapi.com/api.php/provide/vod/' },
-  { key: 'dytt', name: '电影天堂', api: 'https://caiji.dyttzyapi.com/api.php/provide/vod/' },
-  { key: 'zd',   name: '最大资源', api: 'https://api.zuidapi.com/api.php/provide/vod/' },
-  { key: 'sn',   name: '索尼资源', api: 'https://suoniapi.com/api.php/provide/vod/at/json/' },
   { key: 'ff',   name: '非凡资源', api: 'https://cj.ffzyapi.com/api.php/provide/vod/at/json' },
+  { key: 'bf',   name: '暴风资源', api: 'https://bfzyapi.com/api.php/provide/vod/' },
   { key: 'js',   name: '极速资源', api: 'https://jszyapi.com/api.php/provide/vod/at/json' },
+  { key: 'dytt', name: '电影天堂', api: 'https://caiji.dyttzyapi.com/api.php/provide/vod/' },
+  { key: 'sn',   name: '索尼资源', api: 'https://suoniapi.com/api.php/provide/vod/at/json/' },
+  { key: 'zd',   name: '最大资源', api: 'https://api.zuidapi.com/api.php/provide/vod/' },
 ];
 
 const API = {
@@ -3819,7 +3819,17 @@ async function playEp(lineIdx, epIdx, isAuto) {
 
   if (isM3u8 && window.Hls && window.Hls.isSupported()) {
     const src = API.hls(url);
-    hls = new window.Hls({ maxBufferLength: 30, manifestLoadingMaxRetry: 2 });
+    // 缓冲调大 + 提高初始带宽估计：CDN 不给力时，多缓冲几个分片比反复卡顿强。
+    // abrEwmaDefaultEstimate 默认只有 500kbps，会让它一开始就挑低码率甚至来不及取片。
+    hls = new window.Hls({
+      maxBufferLength: 60,
+      maxMaxBufferLength: 120,
+      maxBufferSize: 60 * 1000 * 1000,
+      manifestLoadingMaxRetry: 3,
+      levelLoadingMaxRetry: 3,
+      fragLoadingMaxRetry: 4,
+      abrEwmaDefaultEstimate: 2000000,
+    });
     // 关键：hls.js 只负责把流灌进 <video>，不会自己 play。
     // 少了这一句，表现就是「加载出来了但停在 0:00」。
     hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
