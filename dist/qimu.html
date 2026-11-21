@@ -1526,7 +1526,7 @@ body[data-real="mobile"] #devToggle{display:none !important}
 [hidden]{display:none !important}
 
 </style>
-<meta name="qimu-version" content="24">
+<meta name="qimu-version" content="25">
 </head>
 <body data-device="desktop" data-tab="home">
 
@@ -4359,11 +4359,13 @@ async function autoSwitchSource() {
 
       await openDetail(hit.vod_id, false);
       if (S.lines.length) {
+        S.failover.lines = new Set();
+        const li = S.lineIdx >= 0 && S.lineIdx < S.lines.length ? S.lineIdx : 0;
         const ep = epWanted >= 0
-          ? Math.min(epWanted, S.lines[0].episodes.length - 1)
+          ? Math.min(epWanted, S.lines[li].episodes.length - 1)
           : 0;
         S.failover.busy = false;
-        playEp(0, ep, true);
+        playEp(li, ep, true);
         return;
       }
     } catch (e) {
@@ -4385,6 +4387,7 @@ async function playEp(lineIdx, epIdx, isAuto) {
   if (!isAuto) resetFailover();          // 用户主动播放 → 重置失败记录
   cancelNext();                          // 切集/重播时取消上一轮的连播倒计时
 
+  killPlayer();                          // 必须先停掉旧播放（会递增 S.playToken），再取新 token
   S.lineIdx = lineIdx; S.epIdx = epIdx;
   const token = ++S.playToken;           // 旧回调不许干扰新播放
   renderLines(); renderEpisodes();
@@ -4401,10 +4404,10 @@ async function playEp(lineIdx, epIdx, isAuto) {
     vid.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;background:#000;z-index:5';
     box.appendChild(vid);
   }
+  vid.onerror = null;
   const img = $('#pImg'); if (img) img.style.display = 'none';
   const ov = $('#pOverlay'); if (ov) ov.classList.add('hidden');
 
-  killPlayer();
   setPlayerLoading(true, `正在连接「${line.name}」…`);
   player = vid;
   const url = ep.url;
