@@ -17,25 +17,28 @@
   /* 色阶 */
   --canvas:#141414;
   --surface:#181818;
+  --surface-2:#202020;
   --control:#2F2F2F;
-  --pill:rgba(255,255,255,.1);
-  --pill-bd:rgba(255,255,255,.2);
-  --nav-scrolled:rgba(20,20,20,.85);
+  --pill:rgba(255,255,255,.09);
+  --pill-bd:rgba(255,255,255,.18);
+  --border:rgba(255,255,255,.08);
+  --border-strong:rgba(255,255,255,.18);
+  --nav-scrolled:rgba(18,18,18,.84);
   /* 语义 */
   --red:#E50914;
   --red-hover:#F40612;
   --green:#46D369;
   --fg:#FFFFFF;
   --fg2:#D2D2D2;
-  --fg3:#808080;
+  --fg3:#888888;
   /* 几何 */
-  --r-card:8px;
-  --r-card-hover:10px;
+  --r-card:10px;
+  --r-card-hover:12px;
   --r-pill:9999px;
-  --shadow-float:0 14px 28px rgba(0,0,0,.75), 0 10px 10px rgba(0,0,0,.6);
+  --shadow-float:0 18px 38px rgba(0,0,0,.78), 0 8px 16px rgba(0,0,0,.55);
   /* 运动 */
   --ease:cubic-bezier(.22,1,.36,1);
-  --dur:350ms;
+  --dur:320ms;
   /* 环境光 */
   --ambient:rgba(180,20,30,.45);
   --nav-h:68px;
@@ -81,20 +84,24 @@ input{font:inherit}
    ══════════════════════════════════════════════════════════ */
 .nav-d{
   position:fixed;top:0;left:0;right:0;height:var(--nav-h);z-index:60;
-  display:flex;align-items:center;gap:clamp(14px,2vw,34px);padding:0 4%;
-  transition:background var(--dur) var(--ease),backdrop-filter var(--dur);
-  background:linear-gradient(180deg,rgba(0,0,0,.7),transparent);
+  display:flex;align-items:center;gap:clamp(14px,2vw,32px);padding:0 4%;
+  transition:background var(--dur) var(--ease),backdrop-filter var(--dur),border-color var(--dur);
+  background:linear-gradient(180deg,rgba(12,12,12,.82),transparent);
+  border-bottom:1px solid transparent;
 }
 .nav-d.scrolled{
   background:var(--nav-scrolled);
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);
+  border-bottom-color:rgba(255,255,255,.07);
 }
 .logo:hover{color:var(--red-hover)}
 .logo{
-  font-family:var(--font-display);
+  font-family:var(--font-display);cursor:pointer;
   font-size:26px;font-weight:800;letter-spacing:-.055em;color:var(--red);
   text-transform:uppercase;line-height:1;flex-shrink:0;user-select:none;
+  transition:color 180ms var(--ease),transform 180ms var(--ease);
 }
+.logo:active{transform:scale(.96)}
 .nav-pills{display:flex;align-items:center;gap:6px}
 .nav-pill{
   padding:7px 15px;border-radius:999px;font-size:13.5px;color:var(--fg2);
@@ -132,33 +139,45 @@ input{font:inherit}
 /* ══════════════════════════════════════════════════════════
    3. 桌面端 Hero 巨幕
    ══════════════════════════════════════════════════════════ */
-.hero-d{position:relative;height:85vh;min-height:540px;overflow:hidden}
+.hero-d{position:relative;height:80vh;min-height:520px;max-height:760px;overflow:hidden}
+.hero-d::after{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:radial-gradient(ellipse 64% 58% at 72% 28%,var(--ambient) 0%,transparent 72%);
+  transition:background 700ms var(--ease);
+}
 .hero-d .bg{
   position:absolute;inset:0;background-size:cover;background-position:center 20%;
-  animation:heroIn 1.6s var(--ease) both;
+  animation:heroIn 1.4s var(--ease) both;
+  transition:background-image .5s var(--ease);
 }
 @keyframes heroIn{from{opacity:0;transform:scale(1.06)}to{opacity:1;transform:none}}
 .hero-d .vignette{
-  position:absolute;inset:0;
+  position:absolute;inset:0;z-index:2;
   background:
-    linear-gradient(90deg,rgba(20,20,20,.97) 0%,rgba(20,20,20,.72) 32%,rgba(20,20,20,0) 68%),
-    linear-gradient(0deg,#141414 0%,rgba(20,20,20,.65) 18%,transparent 48%);
+    linear-gradient(90deg,rgba(20,20,20,.98) 0%,rgba(20,20,20,.78) 34%,rgba(20,20,20,.18) 65%,rgba(20,20,20,.05) 100%),
+    linear-gradient(0deg,#141414 0%,rgba(20,20,20,.72) 22%,transparent 54%);
 }
 .hero-d .inner{
-  position:relative;z-index:3;padding:0 4%;max-width:640px;
-  padding-top:max(18vh,140px);
-  animation:heroText .9s var(--ease) .25s both;
+  position:relative;z-index:3;padding:0 4%;max-width:660px;
+  padding-top:max(16vh,126px);
+  animation:heroText .85s var(--ease) .15s both;
 }
-@keyframes heroText{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes heroText{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
 .hero-badge{
-  display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;
-  letter-spacing:.06em;color:var(--fg2);margin-bottom:16px;
+  display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;
+  letter-spacing:.08em;color:var(--fg2);margin-bottom:14px;
+  padding:4px 11px 4px 8px;border-radius:9999px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
 }
-.hero-badge .n{color:var(--red);font-weight:900}
+.hero-badge .n{
+  color:#fff;background:var(--red);padding:2px 6px;border-radius:9999px;
+  font-size:10.5px;font-weight:800;letter-spacing:.04em;
+}
 .hero-title{
   font-family:var(--font-display);
-  font-size:clamp(38px,5.2vw,76px);font-weight:800;line-height:.96;
-  letter-spacing:-.042em;word-spacing:.1em;margin-bottom:16px;text-shadow:0 3px 30px rgba(0,0,0,.8);
+  font-size:clamp(34px,4.6vw,64px);font-weight:800;line-height:1.05;
+  letter-spacing:-.036em;margin-bottom:14px;text-shadow:0 4px 32px rgba(0,0,0,.85);
 }
 .hero-meta{
   display:flex;align-items:center;gap:10px;flex-wrap:wrap;
@@ -166,103 +185,154 @@ input{font:inherit}
 }
 .hero-meta .match{color:var(--green);font-weight:700}
 .hero-tag{
-  padding:2px 7px;border-radius:4px;border:1px solid rgba(255,255,255,.35);
-  font-size:11.5px;color:var(--fg2);
+  padding:2px 8px;border-radius:9999px;border:1px solid rgba(255,255,255,.26);
+  background:rgba(255,255,255,.07);font-size:11.5px;color:var(--fg2);
 }
 .hero-desc{
-  font-size:15px;line-height:1.62;color:var(--fg2);margin-bottom:22px;
+  font-size:14.5px;line-height:1.68;color:rgba(255,255,255,.78);margin-bottom:24px;
   max-width:520px;
   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
 }
-.hero-actions{display:flex;gap:11px;flex-wrap:wrap}
+.hero-actions{display:flex;gap:11px;flex-wrap:wrap;align-items:center}
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  height:46px;padding:0 26px;border-radius:5px;font-size:15.5px;font-weight:700;
+  height:44px;padding:0 26px;border-radius:9999px;font-size:15px;font-weight:700;
   transition:all 200ms var(--ease);white-space:nowrap;
 }
-.btn-play{background:#fff;color:#000}
-.btn-play:hover{background:rgba(255,255,255,.78)}
-.btn-ghost{background:var(--control);color:#fff}
-.btn-ghost:hover{background:#3d3d3d}
-.btn-round{
-  width:46px;height:46px;padding:0;border-radius:50%;flex-shrink:0;
-  border:2px solid rgba(255,255,255,.42);background:rgba(20,20,20,.45);
-  backdrop-filter:blur(4px);
+.btn:active{transform:scale(.97)}
+.btn-play{background:#fff;color:#000;box-shadow:0 10px 28px rgba(0,0,0,.45)}
+.btn-play:hover{background:rgba(255,255,255,.86);transform:translateY(-1px)}
+.btn-ghost{
+  background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.18);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
 }
-.btn-round:hover{border-color:#fff;background:rgba(20,20,20,.75)}
+.btn-ghost:hover{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.32)}
+.btn-ghost.on{background:rgba(229,9,20,.2);border-color:rgba(229,9,20,.6);color:#fff}
+.btn-round{
+  width:44px;height:44px;padding:0;border-radius:50%;flex-shrink:0;
+  border:1px solid rgba(255,255,255,.28);background:rgba(20,20,20,.55);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  display:grid;place-items:center;transition:all 200ms var(--ease);
+}
+.btn-round:hover{border-color:#fff;background:rgba(255,255,255,.16)}
+.btn-round:active{transform:scale(.94)}
 .btn-round.on{border-color:#fff;background:#fff;color:#000}
 
 /* ══════════════════════════════════════════════════════════
    4. 轨道与卡片（桌面 300ms 防抖横向推挤）
    ══════════════════════════════════════════════════════════ */
-.rows-wrap{position:relative;z-index:5;margin-top:-110px;padding-bottom:60px}
-.row-block{margin-bottom:clamp(18px,2.4vw,34px)}
+.rows-wrap{position:relative;z-index:5;margin-top:-72px;padding-bottom:64px}
+.row-block{margin-bottom:clamp(20px,2.6vw,36px);position:relative}
 .row-head{
-  display:flex;align-items:baseline;gap:10px;padding:0 4%;margin-bottom:10px;
+  display:flex;align-items:center;gap:10px;padding:0 4%;margin-bottom:10px;
 }
-.row-title{font-size:clamp(15px,1.5vw,19px);font-weight:700;letter-spacing:-.012em}
+.row-title{
+  font-size:clamp(15.5px,1.5vw,19px);font-weight:700;letter-spacing:-.014em;
+  display:inline-flex;align-items:center;gap:9px;
+}
+.row-title::before{
+  content:'';width:3px;height:15px;border-radius:2px;background:var(--red);flex-shrink:0;
+}
+.row-count{font-size:11.5px;color:var(--fg3);font-weight:500;font-variant-numeric:tabular-nums}
 .row-more{
-  margin-left:auto;font-size:12.5px;color:var(--fg3);opacity:0;transition:opacity 200ms;
+  margin-left:auto;font-size:12.5px;color:var(--fg3);opacity:0;transition:opacity 200ms,color 180ms;
   display:inline-flex;align-items:center;gap:4px;
 }
 .row-block:hover .row-more{opacity:1}
 .row-more:hover{color:#fff}
 
+.row-stage{position:relative}
 .row{
-  display:flex;gap:8px;padding:8px 4% 26px;
+  display:flex;gap:10px;padding:8px 4% 24px;
   overflow-x:auto;overflow-y:hidden;
   scroll-behavior:smooth;scrollbar-width:none;
 }
 .row::-webkit-scrollbar{display:none}
+.row-arrow{
+  position:absolute;top:8px;bottom:24px;width:44px;z-index:45;
+  display:grid;place-items:center;color:#fff;
+  opacity:0;pointer-events:none;transition:opacity 220ms var(--ease),background 220ms var(--ease);
+}
+.row-arrow.prev{left:0;background:linear-gradient(90deg,rgba(20,20,20,.92),transparent)}
+.row-arrow.next{right:0;background:linear-gradient(270deg,rgba(20,20,20,.92),transparent)}
+.row-stage:hover .row-arrow{opacity:1;pointer-events:auto}
+.row-arrow:hover{color:#fff}
+.row-arrow svg{
+  width:28px;height:28px;padding:5px;border-radius:50%;
+  background:rgba(20,20,20,.72);border:1px solid rgba(255,255,255,.16);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  transition:transform 180ms var(--ease),background 180ms;
+}
+.row-arrow:hover svg{background:rgba(255,255,255,.18);transform:scale(1.08)}
+.row-arrow:active svg{transform:scale(.94)}
 
 .card{
-  position:relative;flex:0 0 auto;width:142px;
-  transition:width var(--dur) var(--ease);
+  position:relative;flex:0 0 auto;width:146px;
+  transition:width var(--dur) var(--ease),transform 220ms var(--ease);
   will-change:width;cursor:pointer;
 }
 .card .media{
-  position:relative;height:213px;border-radius:var(--r-card);overflow:hidden;
-  background:#222;
+  position:relative;height:219px;border-radius:var(--r-card);overflow:hidden;
+  background:linear-gradient(110deg,#1c1c1c 8%,#262626 18%,#1c1c1c 33%);
+  background-size:200% 100%;animation:shimmer 1.6s linear infinite;
   transition:height var(--dur) var(--ease),box-shadow var(--dur) var(--ease),
-             border-radius var(--dur) var(--ease);
-  border:1px solid transparent;
+             border-radius var(--dur) var(--ease),border-color var(--dur) var(--ease);
+  border:1px solid rgba(255,255,255,.07);
 }
+@keyframes shimmer{to{background-position-x:-200%}}
+.card .media.loaded{animation:none;background:#1c1c1c}
 .card .media img{width:100%;height:100%;object-fit:cover;
-  transition:transform 500ms var(--ease),opacity 260ms}
+  transition:transform 500ms var(--ease),opacity 280ms}
+.card:hover .media{border-color:rgba(255,255,255,.22)}
 .card:hover .media img{transform:scale(1.04)}
-.card.expanded{width:330px;z-index:40}
+.card.expanded{width:336px;z-index:40}
 .card.expanded .media{
-  height:186px;                                   /* 16:9 */
+  height:189px;                                   /* 16:9 */
   border-radius:var(--r-card-hover);
-  box-shadow:var(--shadow-float),0 0 0 1px rgba(255,255,255,.14);
+  box-shadow:var(--shadow-float),0 0 0 1px rgba(255,255,255,.18);
+}
+.card-badge{
+  position:absolute;top:7px;right:7px;z-index:3;max-width:calc(100% - 14px);
+  padding:2px 7px;border-radius:6px;
+  background:rgba(12,12,12,.74);border:1px solid rgba(255,255,255,.14);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  font-size:10px;font-weight:600;color:rgba(255,255,255,.92);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;
 }
 /* 展开后的预览元数据条：压在预览图底部，不越出卡片（越出会被行的 overflow 裁掉） */
 .card .drawer{
   position:absolute;left:0;right:0;bottom:0;z-index:6;
-  background:linear-gradient(0deg,rgba(15,15,15,.97) 55%,rgba(15,15,15,.55) 100%);
-  border-radius:0 0 var(--r-card-hover) var(--r-card-hover);padding:11px 12px 12px;
+  background:linear-gradient(0deg,rgba(14,14,14,.98) 48%,rgba(14,14,14,.74) 82%,transparent 100%);
+  border-radius:0 0 var(--r-card-hover) var(--r-card-hover);padding:18px 12px 12px;
   opacity:0;transform:translateY(10px);pointer-events:none;
   transition:opacity 240ms var(--ease) 60ms,transform 240ms var(--ease) 60ms;
 }
 .card.expanded .drawer{opacity:1;transform:none;pointer-events:auto}
-.drawer-actions{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.drawer-actions{display:flex;align-items:center;gap:7px;margin-bottom:8px}
 .mini-btn{
   width:32px;height:32px;border-radius:50%;display:grid;place-items:center;
-  border:2px solid rgba(255,255,255,.35);background:rgba(42,42,42,.75);
+  border:1.5px solid rgba(255,255,255,.35);background:rgba(36,36,36,.82);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
   transition:all 180ms var(--ease);flex-shrink:0;
 }
-.mini-btn:hover{border-color:#fff;background:rgba(255,255,255,.16)}
-.mini-btn.on{background:#fff;color:#000;border-color:#fff}
-.mini-btn.play{background:#fff;color:#000;border-color:#fff;margin-left:auto}
-.drawer-tags{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
-  font-size:11.5px;margin-bottom:7px}
+.mini-btn:hover{border-color:#fff;background:rgba(255,255,255,.18);transform:scale(1.06)}
+.mini-btn:active{transform:scale(.94)}
+.mini-btn.on{background:var(--red);color:#fff;border-color:var(--red)}
+.mini-btn.play{background:#fff;color:#000;border-color:#fff}
+.mini-btn.play:hover{background:rgba(255,255,255,.88)}
+.drawer-title{
+  font-size:13.5px;font-weight:700;color:#fff;line-height:1.25;margin-bottom:5px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.drawer-tags{display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+  font-size:11px;margin-bottom:5px}
 .tag-match{color:var(--green);font-weight:700}
 .tag-box{
-  padding:1px 6px;border-radius:3px;border:1px solid rgba(255,255,255,.3);
-  font-size:10.5px;color:var(--fg2);letter-spacing:.04em;
+  padding:1px 7px;border-radius:9999px;border:1px solid rgba(255,255,255,.22);
+  background:rgba(255,255,255,.07);font-size:10.5px;color:var(--fg2);letter-spacing:.02em;
 }
 .drawer-genres{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--fg2)}
-.dot{width:3px;height:3px;border-radius:50%;background:#555;flex-shrink:0}
+.dot{width:3px;height:3px;border-radius:50%;background:#666;flex-shrink:0}
 
 /* 数字用等宽：时间、百分比、集数、日期不跳动 */
 #pTime,.tag-match,.ep-n,.nh-date .d,.rank,.drawer-tags,.d-meta,.hero-meta,.sim .m{
@@ -344,33 +414,34 @@ input{font:inherit}
   transition:background 700ms var(--ease);
 }
 .hero-m .card-big{
-  width:88%;margin:0 auto;aspect-ratio:3/4;border-radius:14px;overflow:hidden;
+  width:88%;margin:0 auto;aspect-ratio:3/4;border-radius:16px;overflow:hidden;
   position:relative;border:1px solid rgba(255,255,255,.18);
-  box-shadow:0 34px 64px -20px rgba(0,0,0,.92);
+  box-shadow:0 34px 64px -20px rgba(0,0,0,.92),inset 0 1px 0 rgba(255,255,255,.16);
   animation:heroCard .8s var(--ease) both;
 }
 @keyframes heroCard{from{opacity:0;transform:scale(.94) translateY(14px)}to{opacity:1;transform:none}}
 .hero-m .card-big img{width:100%;height:100%;object-fit:cover}
 .hero-m .card-big .fade{
   position:absolute;inset:0;
-  background:linear-gradient(0deg,rgba(10,10,10,.96) 0%,rgba(10,10,10,.55) 28%,transparent 58%);
+  background:linear-gradient(0deg,rgba(10,10,10,.96) 0%,rgba(10,10,10,.58) 32%,transparent 62%);
 }
 .hero-m .card-big .info{
   position:absolute;left:0;right:0;bottom:0;padding:16px 16px 18px;text-align:center;
 }
 .hero-m .art{
   font-family:var(--font-display);
-  font-size:26px;font-weight:800;letter-spacing:-.038em;word-spacing:.14em;line-height:1.06;
-  text-transform:uppercase;margin-bottom:9px;
+  font-size:24px;font-weight:800;letter-spacing:-.028em;line-height:1.12;
+  margin-bottom:8px;
   text-shadow:0 3px 20px rgba(0,0,0,.9);
 }
 .hero-m .genres{
   display:flex;align-items:center;justify-content:center;gap:7px;
   font-size:11.5px;color:var(--fg2);margin-bottom:15px;
 }
-.hero-m .two{display:flex;gap:9px}
-.hero-m .two .btn{flex:1;height:42px;font-size:14px;border-radius:6px}
+.hero-m .two{display:flex;gap:9px;align-items:center}
+.hero-m .two .btn{flex:1;height:40px;font-size:13.5px;border-radius:9999px;padding:0 14px}
 .hero-m .two .btn-ghost{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.2)}
+.hero-m .two .btn-round{width:40px;height:40px}
 
 /* ══════════════════════════════════════════════════════════
    7. 新片与热门（移动端视口中心高亮流）
@@ -549,10 +620,17 @@ input{font:inherit}
   font-size:13px;margin-bottom:14px;
 }
 .ep{
-  display:flex;gap:13px;padding:13px 10px;border-radius:8px;align-items:center;
-  border-bottom:1px solid rgba(255,255,255,.07);transition:background 180ms;
+  display:flex;gap:13px;padding:12px 12px;border-radius:12px;align-items:center;
+  border-bottom:1px solid rgba(255,255,255,.06);border-left:3px solid transparent;
+  transition:background 180ms,border-color 180ms;cursor:pointer;
 }
-.ep:hover{background:rgba(255,255,255,.055)}
+.ep:hover{background:rgba(255,255,255,.06)}
+.ep.playing{
+  background:rgba(229,9,20,.12);border-left-color:var(--red);
+}
+.ep.playing .ep-n{color:var(--red)}
+.ep.playing .ep-t .t{color:#fff}
+.ep.playing .ep-t .dur{color:var(--red);font-weight:700}
 .ep-n{font-size:17px;font-weight:700;color:var(--fg3);width:26px;text-align:center;flex-shrink:0}
 .ep-win{width:112px;aspect-ratio:16/9;border-radius:var(--r-card);overflow:hidden;
   flex-shrink:0;position:relative;background:#222}
@@ -582,17 +660,22 @@ input{font:inherit}
    ══════════════════════════════════════════════════════════ */
 .tabbar{
   display:none;position:fixed;left:0;right:0;bottom:0;z-index:150;
-  height:calc(56px + env(safe-area-inset-bottom));
+  height:calc(58px + env(safe-area-inset-bottom));
   padding-bottom:env(safe-area-inset-bottom);
-  background:rgba(18,18,18,.92);
-  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-  border-top:1px solid rgba(255,255,255,.07);
+  background:rgba(16,16,16,.9);
+  backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);
+  border-top:1px solid rgba(255,255,255,.08);
 }
 .tab{
   flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:3px;font-size:10px;color:var(--fg3);transition:color 200ms;position:relative;
+  gap:3px;font-size:10.5px;color:var(--fg3);transition:color 200ms,transform 160ms;position:relative;
 }
-.tab.on{color:#fff}
+.tab:active{transform:scale(.94)}
+.tab.on{color:#fff;font-weight:600}
+.tab.on::after{
+  content:'';position:absolute;top:0;width:24px;height:2px;border-radius:0 0 2px 2px;
+  background:var(--red);
+}
 .tab .badge{
   position:absolute;top:6px;left:calc(50% + 7px);min-width:15px;height:15px;padding:0 4px;
   border-radius:8px;background:var(--red);color:#fff;font-size:9.5px;font-weight:700;
@@ -675,12 +758,13 @@ body[data-device="mobile"] #app::-webkit-scrollbar{width:0}
   .rows-wrap{margin-top:0;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
   .tabbar{display:flex}
   .drag-bar{display:block}
-  .row{padding:8px 16px 18px;gap:8px;
+  .row-arrow{display:none !important}
+  .row{padding:8px 16px 18px;gap:9px;
     scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
-  .card{width:115px;scroll-snap-align:start}
-  .card .media{height:172px}
-  .card.expanded{width:115px}          /* 移动端禁用展开 */
-  .card.expanded .media{height:172px}
+  .card{width:114px;scroll-snap-align:start}
+  .card .media{height:171px}
+  .card.expanded{width:114px}          /* 移动端禁用展开 */
+  .card.expanded .media{height:171px}
   .card .drawer{display:none}
   .card-title{display:-webkit-box}
   .card.top10{width:150px}
@@ -714,59 +798,118 @@ body[data-device="mobile"] #app::-webkit-scrollbar{width:0}
 .src-sel:hover{background:rgba(255,255,255,.14)}
 .src-sel option{background:#181818;color:#fff}
 #status{
-  position:fixed;left:0;right:0;top:var(--nav-h);z-index:55;
-  padding:5px 4%;font-size:11.5px;color:#7d7d7d;pointer-events:none;
+  padding:0 4% 10px;font-size:12px;color:var(--fg3);
+  display:flex;align-items:center;gap:8px;min-height:22px;
 }
-/* 移动端：状态文字改回正常流，别压在 Hero 图片上（真机与预览壳通用） */
+#status::before{
+  content:'';width:6px;height:6px;border-radius:50%;background:var(--green);
+  opacity:.75;flex-shrink:0;
+}
+#status.loading::before{background:#f59e0b;animation:blink 1s infinite}
+#status.err::before{background:var(--red)}
 @container app (max-width:767px){
   #status{
-    position:static;left:auto;right:auto;top:auto;
-    padding:7px 16px 0;font-size:11px;color:#6f6f6f;background:none;
+    padding:8px 16px 2px;font-size:11.5px;color:var(--fg3);
   }
 }
 /* 桌面预览壳里的切换按钮上移，避开底部 TabBar */
 body[data-device="mobile"] #devToggle{bottom:calc(72px + env(safe-area-inset-bottom))}
-#m-lines{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
-#m-lines button{transition:all .2s var(--ease)}
-.hero-d .bg{filter:saturate(1.05)}
+.lines-label{font-size:12px;color:var(--fg3);font-weight:600;margin-bottom:8px;letter-spacing:.04em}
+#m-lines{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.line-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:9999px;font-size:12.5px;font-weight:500;
+  border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);
+  color:var(--fg2);transition:all .2s var(--ease);
+}
+.line-pill:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3);color:#fff}
+.line-pill.on{
+  border-color:#fff;background:#fff;color:#000;font-weight:700;
+  box-shadow:0 6px 18px rgba(0,0,0,.35);
+}
+.line-pill.direct::before{
+  content:'';width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;
+}
+.line-pill.on.direct::before{background:#16a34a}
+.hero-d .bg{filter:saturate(1.06)}
 
 /* ── 分类横栏 ── */
 .catbar{
   display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;
-  padding:14px 4% 2px;margin-top:-58px;position:relative;z-index:6;
+  padding:2px 4% 18px;margin-top:0;position:relative;z-index:6;
 }
 .catbar::-webkit-scrollbar{display:none}
 .catbar button{
-  flex-shrink:0;height:30px;padding:0 14px;border-radius:9999px;
-  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
-  color:#D2D2D2;font-size:12.5px;white-space:nowrap;transition:all .25s var(--ease);
+  flex-shrink:0;height:32px;padding:0 15px;border-radius:9999px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  color:#D2D2D2;font-size:12.5px;font-weight:500;white-space:nowrap;
+  transition:all .22s var(--ease);
 }
-.catbar button:hover{background:rgba(255,255,255,.18);color:#fff}
+.catbar button:hover{background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.28)}
 .catbar button.on{background:#fff;border-color:#fff;color:#000;font-weight:700}
 @container app (max-width:767px){
-  .catbar{margin-top:0;padding:10px 16px 2px}
+  .catbar{margin-top:0;padding:8px 16px 10px}
 }
 
 /* ── 搜索视图 ── */
 .sbar{
   display:flex;align-items:center;gap:10px;
-  margin:16px 4% 6px;padding:0 6px 0 14px;height:46px;
-  background:#2F2F2F;border:1px solid rgba(255,255,255,.2);border-radius:9999px;
+  margin:18px 4% 8px;padding:0 6px 0 16px;height:48px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:9999px;
+  transition:border-color .2s var(--ease),background .2s var(--ease);
 }
+.sbar:focus-within{background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.4)}
 .sbar input{
   flex:1;min-width:0;background:none;border:0;outline:none;
   color:#fff;font-size:15px;
 }
 .sbar input::placeholder{color:#808080}
-.sbar button{
-  height:34px;padding:0 16px;border-radius:9999px;
-  background:#E50914;color:#fff;font-size:13px;font-weight:700;
+.sbar-clear{
+  width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
+  color:var(--fg3);background:rgba(255,255,255,.08);flex-shrink:0;
+  transition:all .16s;
 }
-.sbar button:hover{background:#F40612}
-.shint{padding:14px 4%;font-size:13px;color:#808080}
+.sbar-clear:hover{color:#fff;background:rgba(255,255,255,.18)}
+.sbar .sbar-go{
+  height:36px;padding:0 18px;border-radius:9999px;
+  background:#E50914;color:#fff;font-size:13px;font-weight:700;flex-shrink:0;
+  transition:background .18s,transform .15s;
+}
+.sbar .sbar-go:hover{background:#F40612}
+.sbar .sbar-go:active{transform:scale(.96)}
+.ssrc{
+  display:flex;align-items:center;gap:8px;overflow-x:auto;scrollbar-width:none;
+  padding:8px 4% 4px;
+}
+.ssrc::-webkit-scrollbar{display:none}
+.ssrc-chip{
+  flex-shrink:0;height:29px;padding:0 13px;border-radius:9999px;font-size:12px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:var(--fg2);
+  transition:all .18s var(--ease);
+}
+.ssrc-chip:hover{background:rgba(255,255,255,.13);color:#fff}
+.ssrc-chip.on{background:rgba(229,9,20,.18);border-color:rgba(229,9,20,.65);color:#fff;font-weight:700}
+.shist-wrap{padding:10px 4% 4px}
+.shist-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;font-size:12px;color:var(--fg3)}
+.shist-clear{font-size:12px;color:var(--fg3);padding:2px 6px}
+.shist-clear:hover{color:#fff}
+.shist{display:flex;flex-wrap:wrap;gap:8px}
+.shist-chip{
+  padding:6px 13px;border-radius:9999px;font-size:12.5px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:var(--fg2);
+  transition:all .18s var(--ease);
+}
+.shist-chip:hover{background:rgba(255,255,255,.15);color:#fff}
+.shint{padding:14px 4%;font-size:13px;color:#888}
 @container app (max-width:767px){
-  .sbar{margin:12px 16px 4px}
+  .sbar{margin:12px 16px 6px}
+  .ssrc{padding:6px 16px 2px}
+  .shist-wrap{padding:10px 16px 4px}
   .shint{padding:12px 16px}
+}
+@container app (min-width:768px){
+  #view-search,#view-me,#view-src{padding-top:calc(var(--nav-h) + 8px)}
 }
 
 /* ── 我的 ── */
@@ -790,23 +933,34 @@ body[data-device="mobile"] #devToggle{bottom:calc(72px + env(safe-area-inset-bot
   color:#D2D2D2;
 }
 .meedit:hover{background:rgba(255,255,255,.18);color:#fff}
+.metabs-wrap{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 4%;border-bottom:1px solid rgba(255,255,255,.1);margin:14px 0 8px;
+}
 .metabs{
-  display:flex;gap:22px;padding:0 4%;
-  border-bottom:1px solid rgba(255,255,255,.12);margin-bottom:6px;
+  display:flex;gap:22px;padding:0;
+  border-bottom:none;margin-bottom:0;
 }
 .metabs button{
-  padding:11px 0;font-size:14px;color:#808080;font-weight:500;
+  padding:11px 0;font-size:14px;color:#888;font-weight:500;
   border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;
+  display:inline-flex;align-items:center;gap:6px;
 }
 .metabs button:hover{color:#D2D2D2}
 .metabs button.on{color:#fff;font-weight:700;border-bottom-color:#E50914}
-@media (max-width:767px){
-  .mehead{padding:18px 16px 14px}
-  .metabs{padding:0 16px}
+.metab-cnt{
+  font-size:11px;padding:1px 7px;border-radius:9999px;
+  background:rgba(255,255,255,.08);color:var(--fg3);font-variant-numeric:tabular-nums;
 }
+.metabs button.on .metab-cnt{background:rgba(229,9,20,.2);color:#fff}
+.me-clear-btn{
+  font-size:12px;color:var(--fg3);padding:5px 11px;border-radius:9999px;
+  border:1px solid rgba(255,255,255,.12);transition:all .18s;
+}
+.me-clear-btn:hover{color:#fff;border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.08)}
 @container app (max-width:767px){
   .mehead{padding:18px 16px 14px}
-  .metabs{padding:0 16px}
+  .metabs-wrap{padding:0 16px}
 }
 /* ══ 真机（#app 全屏，body 滚动）修正 ══ */
 /* 百分比高度在 body 高度未定时失效，用 vh 保证背景铺满 */
@@ -1265,24 +1419,106 @@ body[data-real="mobile"] .nh{padding-bottom:calc(72px + env(safe-area-inset-bott
 .tab .av.has-img{background-size:cover;background-position:center;color:transparent}
 .avatar.has-img{background-size:cover;background-position:center;color:transparent}
 
-/* 卡片上区分「可长按删除」的手感 */
+/* 播放器封面播放按钮 + 加载指示（替换原型静态 .pctl） */
+.pctl{display:none !important}
+.player-overlay{
+  position:absolute;inset:0;z-index:4;display:grid;place-items:center;
+  background:radial-gradient(circle at center,rgba(0,0,0,.22),rgba(0,0,0,.62));
+  cursor:pointer;transition:opacity .25s var(--ease);
+}
+.player-overlay.hidden{opacity:0;pointer-events:none}
+.player-play-fab{
+  width:64px;height:64px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(229,9,20,.92);color:#fff;
+  box-shadow:0 14px 36px rgba(229,9,20,.45),0 0 0 8px rgba(255,255,255,.12);
+  transition:transform .22s var(--ease),background .2s;
+}
+.player-overlay:hover .player-play-fab{transform:scale(1.08);background:var(--red-hover)}
+.player-overlay:active .player-play-fab{transform:scale(.95)}
+.p-loading{
+  position:absolute;inset:0;z-index:7;display:none;flex-direction:column;
+  align-items:center;justify-content:center;gap:10px;
+  background:rgba(0,0,0,.58);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  font-size:12.5px;color:#fff;pointer-events:none;
+}
+.p-loading.show{display:flex}
+.p-spin{
+  width:30px;height:30px;border-radius:50%;
+  border:2.5px solid rgba(255,255,255,.22);border-top-color:var(--red);
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* 卡片上删除按钮（历史记录） */
 #meHist .card:active{transform:scale(.97);transition:transform .12s}
+.card-del{
+  position:absolute;top:6px;left:6px;z-index:8;
+  width:24px;height:24px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(15,15,15,.78);border:1px solid rgba(255,255,255,.22);color:#fff;
+  opacity:0;transition:opacity .18s,background .18s,transform .15s;
+}
+.card:hover .card-del{opacity:1}
+.card-del:hover{background:var(--red);border-color:var(--red);transform:scale(1.08)}
+@container app (max-width:767px){
+  .card-del{opacity:.88}
+}
+
+/* 空状态卡片 */
+.empty-box{
+  grid-column:1 / -1;padding:44px 20px;text-align:center;
+  border-radius:16px;background:rgba(255,255,255,.025);border:1px dashed rgba(255,255,255,.1);
+  color:var(--fg3);font-size:13.5px;line-height:1.7;
+}
+.empty-box svg{width:32px;height:32px;margin:0 auto 10px;opacity:.45;stroke:currentColor;fill:none;stroke-width:1.6}
 
 /* 搜索结果 / 历史 / 收藏 的网格：用 ID 压过 .grid 的默认列定义 */
 #searchResult,#meHist,#meFav{
-  padding:12px 16px;
-  grid-template-columns:repeat(auto-fill,minmax(100px,1fr));
-  gap:16px 9px;
+  padding:12px 16px;display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(104px,1fr));
+  gap:16px 10px;
 }
 #searchResult .card,#meHist .card,#meFav .card{width:auto}
 #searchResult .card .media,#meHist .card .media,#meFav .card .media{height:auto;aspect-ratio:2/3}
+#searchResult .card .card-title,#meHist .card .card-title,#meFav .card .card-title{
+  display:-webkit-box !important;
+}
+#searchResult .card.expanded,#meHist .card.expanded,#meFav .card.expanded{width:auto}
+#searchResult .card.expanded .media,#meHist .card.expanded .media,#meFav .card.expanded .media{
+  height:auto;aspect-ratio:2/3;box-shadow:none;
+}
+#searchResult .card .drawer,#meHist .card .drawer,#meFav .card .drawer{display:none !important}
+#searchResult .card:hover,#meHist .card:hover,#meFav .card:hover{transform:translateY(-3px)}
 @container app (min-width:768px){
   #searchResult,#meHist,#meFav{
-    padding:14px 4%;
-    grid-template-columns:repeat(auto-fill,minmax(146px,1fr));
-    gap:18px 14px;
+    padding:14px 4% 32px;
+    grid-template-columns:repeat(auto-fill,minmax(148px,1fr));
+    gap:20px 14px;
   }
 }
+
+/* 骨架屏卡片 */
+.skel-row{display:flex;gap:10px;padding:8px 4% 24px;overflow:hidden}
+.skel-card{flex:0 0 auto;width:146px;height:219px;border-radius:10px;
+  background:linear-gradient(110deg,#1b1b1b 8%,#262626 18%,#1b1b1b 33%);
+  background-size:200% 100%;animation:shimmer 1.4s linear infinite;
+}
+@container app (max-width:767px){
+  .skel-row{padding:8px 16px 18px}
+  .skel-card{width:114px;height:171px}
+}
+
+/* 源列表当前使用徽章 */
+.src-badge-cur{
+  font-size:11px;font-weight:700;color:var(--green);
+  padding:3px 9px;border-radius:9999px;background:rgba(70,211,105,.12);
+  border:1px solid rgba(70,211,105,.35);flex-shrink:0;
+}
+.src-row-use{
+  flex-shrink:0;font-size:11.5px;font-weight:700;color:var(--fg2);
+  padding:6px 12px;border-radius:9999px;border:1px solid rgba(255,255,255,.18);
+  transition:all .16s;
+}
+.src-row-use:hover{background:#fff;color:#000;border-color:#fff}
 
 /* 真机上不显示双端切换按钮 */
 body[data-real="mobile"] #devToggle{display:none !important}
@@ -1290,7 +1526,7 @@ body[data-real="mobile"] #devToggle{display:none !important}
 [hidden]{display:none !important}
 
 </style>
-<meta name="qimu-version" content="23">
+<meta name="qimu-version" content="24">
 </head>
 <body data-device="desktop" data-tab="home">
 
@@ -1298,33 +1534,33 @@ body[data-real="mobile"] #devToggle{display:none !important}
 
   <!-- ══════ 桌面导航 ══════ -->
   <header class="nav-d" id="navD">
-    <div class="logo">启幕</div>
+    <div class="logo" id="logoHome" title="回到首页">启幕</div>
     <nav class="nav-pills">
-      <button class="nav-pill on" data-nav>主页</button>
-      <button class="nav-pill" data-nav>剧集</button>
-      <button class="nav-pill" data-nav>电影</button>
-      <button class="nav-pill" data-nav>新片与热门</button>
-      <button class="nav-pill" data-nav>我的片单</button>
+      <button class="nav-pill on" data-nav="home">主页</button>
+      <button class="nav-pill" data-nav="tv">剧集</button>
+      <button class="nav-pill" data-nav="movie">电影</button>
+      <button class="nav-pill" data-nav="fav">我的片单</button>
+      <button class="nav-pill" data-nav="hist">观看历史</button>
     </nav>
     <div class="nav-right">
-      <button id="srcBtn" class="src-btn"><span id="srcName">暴风资源</span><svg class="icon-16" viewBox="0 0 24 24" style="width:12px;height:12px;opacity:.65"><path d="m6 9 6 6 6-6"/></svg></button>
+      <button id="srcBtn" class="src-btn"><span id="srcName">量子资源</span><svg class="icon-16" viewBox="0 0 24 24" style="width:12px;height:12px;opacity:.65"><path d="m6 9 6 6 6-6"/></svg></button>
       <label class="nav-search">
         <svg class="icon-16" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
         <input type="search" placeholder="搜索影片、演员、类型" id="searchD">
       </label>
-      <button class="icon-btn" title="通知" aria-label="通知">
-        <svg class="icon-20" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      <button class="icon-btn" id="refreshBtn" title="刷新当前片源" aria-label="刷新">
+        <svg class="icon-20" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
       </button>
-      <div class="avatar">阿</div>
+      <div class="avatar" title="我的">阿</div>
     </div>
   </header>
 
   <!-- ══════ 移动顶栏 ══════ -->
   <header class="nav-m">
     <div class="l1">
-      <div class="logo">启幕</div>
+      <div class="logo" id="logoHomeM">启幕</div>
       <div class="r">
-        <button id="srcBtnM" class="src-btn src-btn-sm"><span id="srcNameM">暴风资源</span><svg class="icon-16" viewBox="0 0 24 24" style="width:11px;height:11px;opacity:.65"><path d="m6 9 6 6 6-6"/></svg></button>
+        <button id="srcBtnM" class="src-btn src-btn-sm"><span id="srcNameM">量子资源</span><svg class="icon-16" viewBox="0 0 24 24" style="width:11px;height:11px;opacity:.65"><path d="m6 9 6 6 6-6"/></svg></button>
         <button class="icon-btn" title="搜索" aria-label="搜索" id="searchM">
           <svg class="icon-20" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
         </button>
@@ -1334,35 +1570,34 @@ body[data-real="mobile"] #devToggle{display:none !important}
       <button class="pill-reset" id="pillReset" aria-label="重置筛选">
         <svg class="icon-16" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
-      <button class="pill on" data-pill="type" data-v="剧集">剧集</button>
+      <button class="pill" data-pill="type" data-v="剧集">剧集</button>
       <button class="pill" data-pill="type" data-v="电影">电影</button>
-      <button class="pill keep" data-pill="cat">类别
+      <button class="pill keep" data-pill="cat"><span id="catPillLabel">类别</span>
         <svg class="icon-16" viewBox="0 0 24 24" style="width:12px;height:12px"><path d="m6 9 6 6 6-6"/></svg>
       </button>
     </div>
   </header>
 
   <!-- ══════ 桌面 Hero ══════ -->
-  <div id="status">准备加载…</div>
   <section class="hero-d" id="heroD">
     <div class="bg" id="heroBg"></div>
     <div class="vignette"></div>
     <div class="inner">
-      <div class="hero-badge"><span class="n">N</span> 热播剧集</div>
+      <div class="hero-badge"><span class="n">启幕</span> <span id="heroBadgeType">精选推荐</span></div>
       <h1 class="hero-title" id="heroTitle">—</h1>
       <div class="hero-meta" id="heroMeta"></div>
       <p class="hero-desc" id="heroDesc"></p>
       <div class="hero-actions">
         <button class="btn btn-play" data-act="play">
-          <svg class="icon-24" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M8 5v14l11-7z"/></svg>
+          <svg class="icon-20" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M8 5v14l11-7z"/></svg>
           播放
         </button>
         <button class="btn btn-ghost" data-act="list" id="heroList">
-          <svg class="icon-24" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          <svg class="icon-20" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
           我的片单
         </button>
         <button class="btn-round" data-act="info" title="更多信息">
-          <svg class="icon-24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <svg class="icon-20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
         </button>
       </div>
     </div>
@@ -1385,6 +1620,9 @@ body[data-real="mobile"] #devToggle{display:none !important}
             <svg class="icon-20" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
             我的片单
           </button>
+          <button class="btn-round" data-act="info" title="详情" aria-label="详情">
+            <svg class="icon-20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>
+          </button>
         </div>
       </div>
     </div>
@@ -1392,7 +1630,8 @@ body[data-real="mobile"] #devToggle{display:none !important}
 
   <!-- ══════ 轨道 ══════ -->
   <div class="rows-wrap view" id="view-home" data-v="home">
-    <div class="catbar" id="catbar"></div>
+    <div id="status">准备加载…</div>
+      <div class="catbar" id="catbar"></div>
       <div id="rowsHost"></div>
       <div class="loadmore" id="loadMore" hidden><button id="loadMoreBtn">加载更多</button></div>
   </div>
@@ -1400,9 +1639,20 @@ body[data-real="mobile"] #devToggle{display:none !important}
   <!-- ══════ 新片与热门 ══════ -->
   <section class="view" id="view-search" hidden>
     <div class="sbar">
-      <svg class="icon-20" viewBox="0 0 24 24" style="color:#808080"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
-      <input id="searchInput" type="search" placeholder="搜索片名、演员" autocomplete="off">
-      <button id="searchGo">搜索</button>
+      <svg class="icon-20" viewBox="0 0 24 24" style="color:#888;flex-shrink:0"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
+      <input id="searchInput" type="search" placeholder="搜索片名、演员、关键词" autocomplete="off">
+      <button class="sbar-clear" id="searchClear" aria-label="清空" hidden>
+        <svg class="icon-16" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <button class="sbar-go" id="searchGo">搜索</button>
+    </div>
+    <div class="ssrc" id="searchSources"></div>
+    <div class="shist-wrap" id="searchHistWrap" hidden>
+      <div class="shist-head">
+        <span>最近搜索</span>
+        <button class="shist-clear" id="searchHistClear">清空</button>
+      </div>
+      <div class="shist" id="searchHist"></div>
     </div>
     <div class="shint" id="searchHint">输入片名后回车</div>
     <div class="grid" id="searchResult"></div>
@@ -1416,10 +1666,6 @@ body[data-real="mobile"] #devToggle{display:none !important}
         <div class="mesub" id="meSub">本地账户 · 数据只存在这台设备</div>
       </div>
       <button class="meedit" id="meEdit">改名</button>
-    </div>
-    <div class="metabs">
-      <button data-metab="hist" class="on">观看历史</button>
-      <button data-metab="fav">我的收藏</button>
     </div>
     <div class="me-tools">
       <div class="tool-row">
@@ -1441,10 +1687,17 @@ body[data-real="mobile"] #devToggle{display:none !important}
       </span>
       <span class="me-entry-txt">
         <b>源与种子</b>
-        <span>导入片源配置、磁力链接、种子站</span>
+        <span>查看内置源、导入配置、磁力链接、种子站</span>
       </span>
       <span class="me-entry-arrow">›</span>
     </button>
+    <div class="metabs-wrap">
+      <div class="metabs">
+        <button data-metab="hist" class="on">观看历史 <span class="metab-cnt" id="meHistCnt">0</span></button>
+        <button data-metab="fav">我的收藏 <span class="metab-cnt" id="meFavCnt">0</span></button>
+      </div>
+      <button class="me-clear-btn" id="meClearHist" hidden>清空记录</button>
+    </div>
     <div class="grid" id="meHist"></div>
     <div class="grid" id="meFav" hidden></div>
   </section>
@@ -1469,6 +1722,7 @@ body[data-real="mobile"] #devToggle{display:none !important}
         配置地址是 TVBox 那种 <code>config.json</code>，导入后会把里面所有可用片源一次性加进来。
       </div>
       <div class="src-list" id="srcCustomList"></div>
+      <div class="src-list" id="srcBuiltinList"></div>
     </div>
 
     <div class="sec-block">
@@ -1532,6 +1786,15 @@ body[data-real="mobile"] #devToggle{display:none !important}
             </div>
           </div>
         </div>
+        <div class="player-overlay" id="pOverlay" title="点击播放">
+          <div class="player-play-fab">
+            <svg viewBox="0 0 24 24" style="width:26px;height:26px;fill:currentColor;margin-left:2px"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+        </div>
+        <div class="p-loading" id="pLoading">
+          <div class="p-spin"></div>
+          <span id="pLoadingTxt">正在连接线路…</span>
+        </div>
         <div class="seek-fb" id="seekFb"></div>
         <button class="cast-btn" id="castBtn" title="投屏到电视">
           <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2"><path d="M2 16.1A5 5 0 0 1 5.9 20M2 12.05A9 9 0 0 1 9.95 20M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"/></svg>
@@ -1556,15 +1819,12 @@ body[data-real="mobile"] #devToggle{display:none !important}
                 <svg class="icon-20" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M8 5v14l11-7z"/></svg>
                 播放
               </button>
-              <button class="btn btn-ghost" data-act="dl">
-                <svg class="icon-20" viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M5 21h14"/></svg>
-                下载
+              <button class="btn btn-ghost" data-act="list" id="dList">
+                <svg class="icon-20" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                <span>加入收藏</span>
               </button>
             </div>
             <div class="d-icons">
-              <button class="d-icon" data-act="list" id="dList" title="我的片单">
-                <svg class="icon-20" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-              </button>
               <button class="d-icon" data-act="like" id="dLike" title="评价">
                 <svg class="icon-20" viewBox="0 0 24 24"><path d="M7 10v11H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1z"/><path d="M7 10l4-7a2 2 0 0 1 2 2v3h5a2 2 0 0 1 2 2.4l-1.4 6A2 2 0 0 1 16.6 21H7"/></svg>
               </button>
@@ -1584,11 +1844,8 @@ body[data-real="mobile"] #devToggle{display:none !important}
         </div>
 
         <div id="paneEps">
+          <div class="lines-label">播放线路</div>
           <div id="m-lines"></div>
-          <button class="season-sel" data-act="season" id="seasonSel">
-            <span id="seasonLabel">第 1 季</span>
-            <svg class="icon-16" viewBox="0 0 24 24" style="width:13px;height:13px"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
           <div id="epsHost"></div>
         </div>
         <div id="paneSim" hidden>
@@ -1807,7 +2064,12 @@ function toast(msg) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 1900);
 }
-function say(msg) { const s = $('#status'); if (s) s.textContent = msg; }
+function say(msg, mode) {
+  const s = $('#status'); if (!s) return;
+  s.textContent = msg;
+  s.classList.toggle('loading', mode === 'loading');
+  s.classList.toggle('err', mode === 'err');
+}
 
 /* ── 海报：CMS 给图就代理加载，否则用本地渐变兜底 ── */
 const ART_HUE = {};
@@ -1864,7 +2126,7 @@ async function probePicHost(list) {
   try {
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), 1500);
-    const r = await fetch(API.proxy(url), { signal: ctl.signal });
+    const r = await fetch(API.proxy(url), { signal: ctl.signal, headers: { Range: 'bytes=0-63' } });
     clearTimeout(timer);
     if (!r.ok) { DEAD_PIC_HOSTS.add(host); saveDeadPicHosts(); }
   } catch (e) {
@@ -1968,22 +2230,59 @@ function apiUrl(site, params) {
   return u.toString();
 }
 
-async function cmsFetch(site, params) {
+const CMS_CACHE = new Map();       // targetUrl -> { ts, data }
+const CMS_INFLIGHT = new Map();    // targetUrl -> Promise
+const CMS_CACHE_TTL = 180_000;     // 3 分钟内存缓存，回退/重开详情零延迟
+
+async function cmsFetch(site, params, opts) {
   const target = apiUrl(site, params);
-  let r;
-  try {
-    r = await fetch(API.proxy(target));
-  } catch (e) {
-    throw new Error('连不上代理服务（server 没启动？）');
+  const nocache = opts && opts.nocache;
+  const now = Date.now();
+  if (!nocache) {
+    const hit = CMS_CACHE.get(target);
+    if (hit && (now - hit.ts < CMS_CACHE_TTL)) return hit.data;
+    if (CMS_INFLIGHT.has(target)) return CMS_INFLIGHT.get(target);
   }
-  const text = await r.text();
-  if (!r.ok) throw new Error('上游 ' + r.status);
-  let j;
-  try { j = JSON.parse(text); } catch (e) {
-    throw new Error('返回的不是 JSON：' + text.trim().slice(0, 60));
-  }
-  if (j.code != null && Number(j.code) !== 1) throw new Error('接口 code=' + j.code + ' ' + (j.msg || ''));
-  return j;
+
+  const timeoutMs = params && params.wd ? 12000 : 9000;
+  const run = (async () => {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), timeoutMs);
+    let r;
+    try {
+      r = await fetch(API.proxy(target), { signal: ctl.signal });
+    } catch (e) {
+      clearTimeout(timer);
+      if (e && e.name === 'AbortError') throw new Error('请求超时，请检查网络或切换片源');
+      throw new Error('连不上代理服务（server 没启动？）');
+    }
+    clearTimeout(timer);
+    const text = await r.text();
+    if (!r.ok) throw new Error('上游 ' + r.status);
+    let j;
+    try { j = JSON.parse(text); } catch (e) {
+      throw new Error('返回的不是 JSON：' + text.trim().slice(0, 60));
+    }
+    if (j.code != null && Number(j.code) !== 1) throw new Error('接口 code=' + j.code + ' ' + (j.msg || ''));
+    if (CMS_CACHE.size > 80) {
+      const first = CMS_CACHE.keys().next().value;
+      if (first) CMS_CACHE.delete(first);
+    }
+    CMS_CACHE.set(target, { ts: Date.now(), data: j });
+    return j;
+  })();
+
+  CMS_INFLIGHT.set(target, run);
+  try { return await run; }
+  finally { CMS_INFLIGHT.delete(target); }
+}
+
+function prefetchDetail(site, id) {
+  if (!site || !id) return;
+  const target = apiUrl(site, { ac: 'detail', ids: id });
+  const hit = CMS_CACHE.get(target);
+  if ((hit && Date.now() - hit.ts < CMS_CACHE_TTL) || CMS_INFLIGHT.has(target)) return;
+  cmsFetch(site, { ac: 'detail', ids: id }).catch(() => {});
 }
 const pickList = (j) => Array.isArray(j.list) ? j.list : (Array.isArray(j) ? j : []);
 
@@ -2021,26 +2320,77 @@ function saveHist(rec) {
 }
 const srcKey = (site) => site.key || site.api;
 
-/* ── 收藏 ── */
+/* ── 收藏 / 点赞 ── */
 const FKEY = 'qimu.fav.v1';
 const loadFav = () => { try { return JSON.parse(localStorage.getItem(FKEY) || '{}'); } catch (e) { return {}; } };
 const favList = () => Object.values(loadFav()).sort((a, b) => (b.ts || 0) - (a.ts || 0));
 const isFav = (id) => !!loadFav()[String(id)];
 function toggleFav(v) {
+  if (!v) return false;
   const f = loadFav();
   const k = String(v.vod_id);
   let on;
-  if (f[k]) { delete f[k]; on = false; toast('已从收藏移除'); }
+  if (f[k]) { delete f[k]; on = false; toast('已从我的片单移除'); }
   else {
     f[k] = {
       id: k, title: v.vod_name || '', pic: v.vod_pic || '',
       year: v.vod_year || '', type: v.type_name || '', rem: v.vod_remarks || '',
       src: srcKey(S.site), ts: Date.now(),
     };
-    on = true; toast('已加入收藏');
+    on = true; toast('已加入我的片单');
   }
   try { localStorage.setItem(FKEY, JSON.stringify(f)); } catch (e) {}
+  syncFavButtons(k);
   return on;
+}
+
+const LKEY = 'qimu.like.v1';
+const loadLikes = () => { try { return JSON.parse(localStorage.getItem(LKEY) || '{}'); } catch (e) { return {}; } };
+const isLiked = (id) => !!loadLikes()[String(id)];
+function toggleLike(id) {
+  const k = String(id);
+  const l = loadLikes();
+  let on;
+  if (l[k]) { delete l[k]; on = false; toast('已取消喜欢'); }
+  else { l[k] = Date.now(); on = true; toast('已标为喜欢'); }
+  try { localStorage.setItem(LKEY, JSON.stringify(l)); } catch (e) {}
+  return on;
+}
+
+function syncFavButtons(id) {
+  const k = String(id || '');
+  const onHero = !!(S.hero && String(S.hero.vod_id) === k);
+  const heroFav = S.hero ? isFav(S.hero.vod_id) : false;
+  const setHeroBtn = (btn) => {
+    if (!btn) return;
+    btn.classList.toggle('on', heroFav);
+    btn.innerHTML = (heroFav
+      ? '<svg class="icon-20" viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></svg> 已加入'
+      : '<svg class="icon-20" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> 我的片单');
+  };
+  if (!k || onHero) {
+    setHeroBtn($('#heroList'));
+    setHeroBtn($('#heroMList'));
+  }
+  if (S.item && (!k || String(S.item.vod_id) === k)) {
+    const dl = $('#dList');
+    const fav = isFav(S.item.vod_id);
+    if (dl) {
+      dl.classList.toggle('on', fav);
+      dl.innerHTML = (fav
+        ? '<svg class="icon-20" viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></svg><span>已收藏</span>'
+        : '<svg class="icon-20" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>加入收藏</span>');
+    }
+  }
+  if (k) {
+    $$(`.card[data-id="${CSS.escape ? CSS.escape(k) : k}"] .mini-btn[data-act="list"]`).forEach(b => {
+      const fav = isFav(k);
+      b.classList.toggle('on', fav);
+      b.innerHTML = fav
+        ? '<svg class="icon-16" viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></svg>'
+        : '<svg class="icon-16" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+    });
+  }
 }
 
 /* ── 昵称 ── */
@@ -2223,7 +2573,16 @@ function currentScrollY() {
 }
 
 /* ── 视图切换（纯 JS 控制，避免和容器查询打架） ── */
-function switchTab(name) {
+function setDesktopNav(key) {
+  $$('[data-nav]').forEach(x => x.classList.toggle('on', x.dataset.nav === key));
+}
+
+function switchTab(name, navKey) {
+  const srcView = $('#view-src');
+  if (srcView) { srcView.hidden = true; srcView.style.display = 'none'; }
+  const tabbar = document.querySelector('.tabbar');
+  if (tabbar) tabbar.style.display = '';
+
   document.body.dataset.tab = name;
   $$('.tab').forEach(x => x.classList.toggle('on', x.dataset.tab === name));
 
@@ -2240,14 +2599,20 @@ function switchTab(name) {
   vis('.hero-d', name === 'home');
   const st = $('#status'); if (st) st.style.display = name === 'home' ? '' : 'none';
 
+  if (navKey) setDesktopNav(navKey);
+  else if (name === 'home' && !S.cat) setDesktopNav('home');
+  else if (name === 'me') setDesktopNav(meTab === 'fav' ? 'fav' : 'hist');
+  else if (name === 'search') setDesktopNav('');
+
   if (name === 'search') {
+    renderSearchSources();
+    renderSearchHist();
     const i = $('#searchInput');
     if (i) setTimeout(() => i.focus(), 150);
   }
   if (name === 'me') renderMe();
 
   scrollToTop(true);
-  setTimeout(updateNhActive, 320);
 }
 
 /* ── 源选择抽屉 ── */
@@ -2301,8 +2666,13 @@ function openCatMask() {
       b.textContent = label;
       b.onclick = () => {
         closeCatMask();
-        /* 复用分类筛选：伪造一个 catbar 按钮上下文 */
-        filterByCat(tid, null, label);
+        if (!tid) {
+          S.cat = '';
+          syncMobileCatPill('');
+          loadHome(S.site);
+        } else {
+          filterByCat(tid, null, label);
+        }
       };
       return b;
     };
@@ -2326,6 +2696,32 @@ function closeCatMask() {
 /* ══════════════════════════════════════════════════════════
    分类横栏
    ══════════════════════════════════════════════════════════ */
+function renderSkeleton(host, rows = 2) {
+  if (!host) return;
+  host.innerHTML = '';
+  for (let r = 0; r < rows; r++) {
+    const b = el('section', 'row-block');
+    b.innerHTML = `<div class="row-head"><div style="width:120px;height:18px;border-radius:6px;background:rgba(255,255,255,.07)"></div></div>`;
+    const row = el('div', 'skel-row');
+    for (let i = 0; i < 9; i++) row.appendChild(el('div', 'skel-card'));
+    b.appendChild(row);
+    host.appendChild(b);
+  }
+}
+
+function syncMobileCatPill(label) {
+  const catBtn = $('.pill[data-pill="cat"]');
+  const catLbl = $('#catPillLabel');
+  if (!catBtn || !catLbl) return;
+  if (label && S.cat) {
+    catLbl.textContent = label;
+    catBtn.classList.add('on');
+  } else {
+    catLbl.textContent = '类别';
+    catBtn.classList.remove('on');
+  }
+}
+
 function renderCats() {
   const bar = $('#catbar');
   if (!bar) return;
@@ -2334,8 +2730,17 @@ function renderCats() {
 
   const mk = (label, tid) => {
     const b = el('button', String(S.cat) === String(tid) ? 'on' : '');
+    b.dataset.tid = String(tid);
     b.textContent = label;
-    b.onclick = () => filterByCat(tid, b);
+    b.onclick = () => {
+      if (!tid) {
+        S.cat = '';
+        syncMobileCatPill('');
+        loadHome(S.site);
+      } else {
+        filterByCat(tid, b);
+      }
+    };
     return b;
   };
   bar.appendChild(mk('全部', ''));
@@ -2344,12 +2749,24 @@ function renderCats() {
   });
 }
 
+async function filterByTypeName(tName) {
+  const cat = (S.cats || []).find(c => String(c.type_name || '').includes(tName));
+  const tid = cat ? cat.type_id : '';
+  if (!tid) {
+    toast(`当前源没有「${tName}」这个分类`);
+    return false;
+  }
+  await filterByCat(tid, null, tName);
+  return true;
+}
+
 async function filterByCat(tid, btn, labelOverride) {
   S.cat = tid;
-  if (btn) $$('#catbar button').forEach(x => x.classList.toggle('on', x === btn));
-  else $$('#catbar button').forEach(x => x.classList.toggle('on', false));
+  $$('#catbar button').forEach(x => x.classList.toggle('on', x === btn || String(x.dataset.tid) === String(tid)));
   const label = labelOverride || (btn ? btn.textContent : '全部');
-  say(`筛选 ${label}…`);
+  syncMobileCatPill(tid ? label : '');
+  say(`筛选 ${label}…`, 'loading');
+  renderSkeleton($('#rowsHost'), 1);
   try {
     // 这些站的「父分类」（电影片/连续剧）本身几乎没数据，
     // 片都在子分类（动作片/喜剧片/国产剧…）下。点父分类必须合并子类。
@@ -2360,7 +2777,7 @@ async function filterByCat(tid, btn, labelOverride) {
 
     let list = [];
     if (kids.length) {
-      say(`筛选 ${label}（合并 ${kids.length} 个子分类）…`);
+      say(`筛选 ${label}（合并 ${kids.length} 个子分类）…`, 'loading');
       const chunks = await Promise.all(kids.map(async (c) => {
         try {
           const j = await cmsFetch(S.site, { ac: 'list', pg: 1, t: c.type_id });
@@ -2383,7 +2800,7 @@ async function filterByCat(tid, btn, labelOverride) {
     const host = $('#rowsHost');
     host.innerHTML = '';
     if (!list.length) {
-      host.innerHTML = `<div style="padding:50px 4%;color:#808080;font-size:13.5px">「${esc(label)}」在这个源里没有内容，换个分类或换个源试试</div>`;
+      host.innerHTML = `<div class="empty-box" style="margin:12px 4%">「${esc(label)}」在这个源里没有内容，换个分类或换个源试试</div>`;
       say(`${label} · 0 条`);
       return;
     }
@@ -2393,32 +2810,91 @@ async function filterByCat(tid, btn, labelOverride) {
     if (b) host.appendChild(b);
     say(`${label} · ${list.length} 条${extra}`);
   } catch (e) {
-    say(`筛选失败：${e.message}`);
+    say(`筛选失败：${e.message}`, 'err');
   }
 }
 
 /* ══════════════════════════════════════════════════════════
    搜索视图
    ══════════════════════════════════════════════════════════ */
+const SEARCH_HIST_KEY = 'qimu.shist.v1';
+function loadSearchHist() { return loadJson(SEARCH_HIST_KEY, []); }
+function addSearchHist(q) {
+  const s = String(q || '').trim();
+  if (!s) return;
+  const list = loadSearchHist().filter(x => x !== s);
+  list.unshift(s);
+  saveJson(SEARCH_HIST_KEY, list.slice(0, 10));
+  renderSearchHist();
+}
+function renderSearchHist() {
+  const wrap = $('#searchHistWrap');
+  const host = $('#searchHist');
+  if (!wrap || !host) return;
+  const list = loadSearchHist();
+  wrap.hidden = !list.length;
+  host.innerHTML = '';
+  list.forEach(q => {
+    const b = el('button', 'shist-chip', esc(q));
+    b.onclick = () => {
+      const si = $('#searchInput');
+      if (si) si.value = q;
+      const clr = $('#searchClear');
+      if (clr) clr.hidden = false;
+      doSearchView(q);
+    };
+    host.appendChild(b);
+  });
+}
+function renderSearchSources() {
+  const host = $('#searchSources');
+  if (!host) return;
+  host.innerHTML = '';
+  SITES.forEach(s => {
+    const b = el('button', 'ssrc-chip' + (S.site.key === s.key ? ' on' : ''), esc(s.name));
+    b.onclick = () => {
+      if (S.site.key === s.key) return;
+      S.site = s;
+      syncSrcLabel();
+      renderSearchSources();
+      const si = $('#searchInput');
+      const q = (si && si.value.trim()) || S.query;
+      if (q) doSearchView(q);
+      else loadHome(s);
+    };
+    host.appendChild(b);
+  });
+}
+
 function renderSearchResult(list, q) {
   const host = $('#searchResult');
   const hint = $('#searchHint');
   if (!host) return;
   host.innerHTML = '';
   if (!list || !list.length) {
-    if (hint) { hint.style.display = ''; hint.textContent = `「${q}」在 ${S.site.name} 没有结果，换一个源或换个词试试。`; }
+    if (hint) { hint.style.display = ''; hint.textContent = `「${q}」在 ${S.site.name} 没有结果，点上方其他片源试试。`; }
     return;
   }
-  if (hint) hint.style.display = 'none';
+  if (hint) { hint.style.display = ''; hint.textContent = `${S.site.name} · 找到 ${list.length} 条结果`; }
   list.slice(0, 30).forEach(v => host.appendChild(buildCard(v)));
 }
 
 async function doSearchView(q) {
   q = String(q || '').trim();
   if (!q) { toast('输入片名再搜索'); return; }
+  addSearchHist(q);
+  const clr = $('#searchClear'); if (clr) clr.hidden = false;
   const hint = $('#searchHint');
   if (hint) { hint.style.display = ''; hint.textContent = `正在 ${S.site.name} 搜索「${q}」…`; }
-  $('#searchResult').innerHTML = '';
+  const host = $('#searchResult');
+  if (host) {
+    host.innerHTML = '';
+    for (let i = 0; i < 6; i++) {
+      const sk = el('div', 'skel-card');
+      sk.style.cssText = 'width:auto;height:auto;aspect-ratio:2/3';
+      host.appendChild(sk);
+    }
+  }
   try {
     const j = await cmsFetch(S.site, { ac: 'detail', wd: q });
     const list = pickList(j);
@@ -2426,8 +2902,9 @@ async function doSearchView(q) {
     renderSearchResult(list, q);
     say(`搜索「${q}」· ${list.length} 条`);
   } catch (e) {
+    if (host) host.innerHTML = '';
     if (hint) { hint.style.display = ''; hint.textContent = `搜索失败：${e.message}`; }
-    say(`搜索失败：${e.message}`);
+    say(`搜索失败：${e.message}`, 'err');
   }
 }
 
@@ -2440,39 +2917,55 @@ function renderMe() {
   const name = getName();
   const av = $('#meAvatar'); if (av) av.textContent = name.slice(0, 1) || '观';
   const nm = $('#meName'); if (nm) nm.textContent = name;
+  syncAvatars();
   const hist = histList();
   const favs = favList();
   const sub = $('#meSub');
   if (sub) sub.textContent = `本地账户 · 看过 ${hist.length} 部 · 收藏 ${favs.length} 部`;
 
-  const mkGrid = (host, items, isFav) => {
+  const hCnt = $('#meHistCnt'); if (hCnt) hCnt.textContent = String(hist.length);
+  const fCnt = $('#meFavCnt'); if (fCnt) fCnt.textContent = String(favs.length);
+  const clrBtn = $('#meClearHist');
+  if (clrBtn) clrBtn.hidden = !(meTab === 'hist' && hist.length);
+
+  const removeHist = async (r) => {
+    const ok = await confirmDialog(
+      '删除观看记录',
+      `确定要删除「${r.title}」的观看记录吗？删除后无法恢复。`,
+      '删除'
+    );
+    if (!ok) return;
+    const h = loadHist();
+    delete h[(r.src || srcKey(S.site)) + '::' + r.id];
+    try { localStorage.setItem(HKEY, JSON.stringify(h)); } catch (e) {}
+    renderMe();
+    if (!S.cat && !S.query) renderRows();
+    toast('已删除');
+  };
+
+  const mkGrid = (host, items, isFavGrid) => {
     host.innerHTML = '';
     if (!items.length) {
-      host.innerHTML = `<div style="padding:50px 4%;color:#808080;font-size:13.5px">${isFav ? '还没有收藏。在详情页点「加入收藏」。' : '还没有观看记录。看过的片会出现在这里。'}</div>`;
+      host.innerHTML = `<div class="empty-box">
+        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>
+        <div>${isFavGrid ? '还没有收藏影片<br>打开任意影片详情页点「加入收藏」' : '还没有观看记录<br>播放过的影片会自动记录在这里'}</div>
+      </div>`;
       return;
     }
     items.forEach(r => {
-      const v = isFav
+      const v = isFavGrid
         ? { vod_id: r.id, vod_name: r.title, vod_pic: r.pic, vod_year: r.year, vod_remarks: r.rem, type_name: r.type, _src: r.src }
         : { vod_id: r.id, vod_name: r.title, vod_pic: r.pic, vod_year: r.year, vod_remarks: r.ep, type_name: r.type, _src: r.src };
-      const c = buildCard(v, { progress: isFav ? null : (r.dur > 0 ? Math.round((r.t || 0) / r.dur * 100) : null) });
+      const c = buildCard(v, { progress: isFavGrid ? null : (r.dur > 0 ? Math.round((r.t || 0) / r.dur * 100) : null) });
 
-      // 历史卡片支持长按删除
-      if (!isFav) {
-        const consume = attachLongPress(c, async () => {
-          const ok = await confirmDialog(
-            '删除观看记录',
-            `确定要删除「${r.title}」的观看记录吗？删除后无法恢复。`,
-            '删除'
-          );
-          if (!ok) return;
-          const h = loadHist();
-          delete h[(r.src || srcKey(S.site)) + '::' + r.id];
-          try { localStorage.setItem(HKEY, JSON.stringify(h)); } catch (e) {}
-          renderMe();
-          toast('已删除');
-        });
-        // 长按之后紧跟的那次 click 要被吃掉，否则会打开详情
+      if (!isFavGrid) {
+        const del = el('button', 'card-del', '<svg class="icon-16" viewBox="0 0 24 24" style="width:12px;height:12px"><path d="M6 6l12 12M18 6L6 18"/></svg>');
+        del.title = '删除记录';
+        del.setAttribute('aria-label', '删除记录');
+        del.onclick = (e) => { e.stopPropagation(); removeHist(r); };
+        c.querySelector('.media')?.appendChild(del);
+
+        const consume = attachLongPress(c, () => removeHist(r));
         c.addEventListener('click', (e) => {
           if (consume()) { e.stopPropagation(); e.preventDefault(); }
         }, true);
@@ -2510,6 +3003,8 @@ function renderHero(v) {
     };
     probe.src = first;
   }
+  const badgeType = $('#heroBadgeType');
+  if (badgeType) badgeType.textContent = v.type_name ? String(v.type_name).split(/[,，\/]/)[0] : '精选推荐';
   const t = $('#heroTitle'); if (t) t.textContent = v.vod_name || '';
   const meta = $('#heroMeta');
   if (meta) {
@@ -2545,6 +3040,7 @@ function renderHero(v) {
   document.documentElement.style.setProperty('--ambient', `hsla(${hue},58%,32%,.5)`);
 
   S.hero = v;
+  syncFavButtons(v.vod_id);
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -2570,7 +3066,7 @@ function buildCard(v, opts = {}) {
   const picTimeout = setTimeout(() => {
     if (img.naturalWidth === 0) img.onerror && img.onerror();
   }, 8000);
-  img.onload = () => clearTimeout(picTimeout);
+  img.onload = () => { clearTimeout(picTimeout); media.classList.add('loaded'); };
   img.onerror = () => {
     const raw = String(v.vod_pic || '').trim();
     if (picStage === 0 && /^https?:\/\//i.test(raw) && picNeedsExt(raw)) {
@@ -2585,19 +3081,26 @@ function buildCard(v, opts = {}) {
     }
     picStage = 2;
     clearTimeout(picTimeout);
+    media.classList.add('loaded');
     img.src = fallbackArt(v.vod_id || 'x', 400, 600, v.vod_name || '', v.vod_year || '');
     img.onerror = null;
   };
   media.appendChild(img);
+  if (v.vod_remarks) {
+    media.appendChild(el('span', 'card-badge', esc(v.vod_remarks)));
+  }
   if (progress != null) media.appendChild(el('div', 'prog', `<i style="width:${Math.max(2, Math.min(100, progress))}%"></i>`));
   card.appendChild(media);
 
+  const fav = isFav(v.vod_id);
   const drawer = el('div', 'drawer');
   drawer.innerHTML = `
     <div class="drawer-actions">
       <button class="mini-btn play" data-act="play" title="播放"><svg class="icon-16" viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><path d="M8 5v14l11-7z"/></svg></button>
-      <button class="mini-btn" data-act="info" title="详情"><svg class="icon-16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg></button>
+      <button class="mini-btn${fav ? ' on' : ''}" data-act="list" title="我的片单">${fav ? '<svg class="icon-16" viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></svg>' : '<svg class="icon-16" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'}</button>
+      <button class="mini-btn" data-act="info" title="详情" style="margin-left:auto"><svg class="icon-16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg></button>
     </div>
+    <div class="drawer-title">${esc(v.vod_name || '')}</div>
     <div class="drawer-tags">
       ${v.vod_remarks ? `<span class="tag-box">${esc(v.vod_remarks)}</span>` : ''}
       ${v.vod_year ? `<span class="tag-box">${esc(v.vod_year)}</span>` : ''}
@@ -2616,7 +3119,7 @@ function buildCard(v, opts = {}) {
   card.appendChild(title);
 
   card.addEventListener('mouseenter', () => {
-    if (inMobile()) return;
+    if (inMobile() || !card.closest('.row')) return;
     clearTimeout(S.hoverTimer);
     S.hoverTimer = setTimeout(() => {
       if (S.expanded && S.expanded !== card) S.expanded.classList.remove('expanded');
@@ -2624,7 +3127,9 @@ function buildCard(v, opts = {}) {
       S.expanded = card;
       const im = card.querySelector('.media img');
       if (im) im.src = wideOf(v);
-    }, 300);
+      const targetSite = v._src ? (SITES.find(s => srcKey(s) === v._src) || S.site) : S.site;
+      prefetchDetail(targetSite, v.vod_id);
+    }, 280);
   });
   card.addEventListener('mouseleave', () => {
     clearTimeout(S.hoverTimer);
@@ -2646,7 +3151,13 @@ function buildCard(v, opts = {}) {
       }
     }
     const b = e.target.closest('[data-act]');
-    if (b) { e.stopPropagation(); if (b.dataset.act === 'play') openDetail(v.vod_id, true); else openDetail(v.vod_id); return; }
+    if (b) {
+      e.stopPropagation();
+      if (b.dataset.act === 'play') openDetail(v.vod_id, true);
+      else if (b.dataset.act === 'list') toggleFav(v);
+      else openDetail(v.vod_id);
+      return;
+    }
     openDetail(v.vod_id);
   });
   return card;
@@ -2655,15 +3166,29 @@ function buildCard(v, opts = {}) {
 function rowBlock(title, items, opts = {}) {
   if (!items || !items.length) return null;
   const block = el('section', 'row-block');
-  const head = el('div', 'row-head', `<h2 class="row-title">${esc(title)}</h2>`);
+  const head = el('div', 'row-head', `<h2 class="row-title">${esc(title)}</h2><span class="row-count">${items.length} 部</span>`);
   block.appendChild(head);
+
+  const stage = el('div', 'row-stage');
   const row = el('div', 'row');
   items.forEach((v, i) => {
     const prog = opts.continueWatching && v._rec && v._rec.dur > 0
       ? Math.round((v._rec.t || 0) / v._rec.dur * 100) : null;
     row.appendChild(buildCard(v, { rank: opts.top10 ? i + 1 : 0, progress: prog }));
   });
-  block.appendChild(row);
+
+  const prev = el('button', 'row-arrow prev', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>');
+  prev.setAttribute('aria-label', '向左滚动');
+  prev.onclick = () => row.scrollBy({ left: -Math.max(260, row.clientWidth * 0.78), behavior: 'smooth' });
+
+  const next = el('button', 'row-arrow next', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>');
+  next.setAttribute('aria-label', '向右滚动');
+  next.onclick = () => row.scrollBy({ left: Math.max(260, row.clientWidth * 0.78), behavior: 'smooth' });
+
+  stage.appendChild(prev);
+  stage.appendChild(row);
+  stage.appendChild(next);
+  block.appendChild(stage);
   return block;
 }
 
@@ -2685,7 +3210,7 @@ function renderRows() {
   ].filter(Boolean);
 
   if (!blocks.length) {
-    host.innerHTML = `<div style="padding:60px 4%;color:#808080;font-size:14px">还没有内容。检查网络后点右上角刷新。</div>`;
+    host.innerHTML = `<div class="empty-box" style="margin:16px 4%">还没有内容。检查网络后点右上角刷新或切换片源。</div>`;
     return;
   }
   blocks.forEach(b => host.appendChild(b));
@@ -2696,8 +3221,12 @@ function renderRows() {
    ══════════════════════════════════════════════════════════ */
 async function loadHome(site) {
   S.site = site || S.site;
+  S.cat = '';
+  S.query = '';
+  syncMobileCatPill('');
   S.loading = true;
-  say(`加载 ${S.site.name}…`);
+  say(`加载 ${S.site.name}…`, 'loading');
+  if (!S.pool.length) renderSkeleton($('#rowsHost'), 2);
   try {
     const j = await cmsFetch(S.site, { ac: 'list', pg: 1 });
     const list = pickList(j);
@@ -2719,6 +3248,7 @@ async function loadHome(site) {
     renderRows();
     renderPills();
     renderCats();
+    if (list[0]) prefetchDetail(S.site, list[0].vod_id);
 
     // 分页状态复位
     S.poolPage = 1;
@@ -2729,11 +3259,11 @@ async function loadHome(site) {
       if (lb) { lb.disabled = false; lb.textContent = '加载更多'; }
     }
 
-    say(`${S.site.name} · 共 ${S.total} 条 · ${list.length} 条已加载`);
+    say(`${S.site.name} · 共 ${S.total} 条 · 已加载 ${list.length} 条`);
     S.loading = false;
     return true;
   } catch (e) {
-    say(`${S.site.name} 加载失败：${e.message}`);
+    say(`${S.site.name} 加载失败：${e.message}`, 'err');
     S.loading = false;
     return false;
   }
@@ -2745,34 +3275,23 @@ async function loadHome(site) {
 let hls = null;
 let player = null;
 
+function setPlayerLoading(on, msg) {
+  const l = $('#pLoading');
+  const t = $('#pLoadingTxt');
+  if (t && msg) t.textContent = msg;
+  if (l) l.classList.toggle('show', !!on);
+}
+
 function killPlayer() {
   clearTimeout(S.stallTimer);
   S.playToken++;                  // 让所有旧回调失效
+  if (S.playCtl) { try { S.playCtl.abort(); } catch (e) {} S.playCtl = null; }
+  setPlayerLoading(false);
   if (hls) { try { hls.destroy(); } catch (e) {} hls = null; }
   if (player) { try { player.pause(); } catch (e) {} }
 }
 
-async function openDetail(id, autoplay) {
-  const sheet = $('#sheet');
-  sheet.classList.add('open');
-  requestAnimationFrame(() => requestAnimationFrame(() => sheet.classList.add('in')));
-  $('#dTitle').textContent = '加载中…';
-  $('#dDesc').textContent = '';
-  $('#dCast').textContent = '';
-  $('#epsHost').innerHTML = '';
-  $('#simHost').innerHTML = '';
-
-  let v = S.pool.find(x => String(x.vod_id) === String(id));
-  try {
-    const j = await cmsFetch(S.site, { ac: 'detail', ids: id });
-    const d = pickList(j)[0];
-    if (d) v = d;
-  } catch (e) {
-    toast('详情加载失败：' + e.message);
-  }
-  if (!v) { toast('没有拿到详情'); return; }
-  S.item = v;
-
+function paintDetailMeta(v) {
   $('#dTitle').textContent = v.vod_name || '';
   const meta = [];
   if (v.vod_remarks) meta.push(`<span class="tag-box">${esc(v.vod_remarks)}</span>`);
@@ -2790,6 +3309,48 @@ async function openDetail(id, autoplay) {
   if (v.vod_actor) cast.push(`<b>主演：</b>${esc(String(v.vod_actor).slice(0, 80))}`);
   $('#dCast').innerHTML = cast.join('　');
 
+  $('#pImg').src = wideOf(v);
+  $('#pImg').onerror = () => { $('#pImg').src = fallbackArt(v.vod_id || 'x', 960, 540, '', v.vod_name || ''); };
+  syncFavButtons(v.vod_id);
+  const dl = $('#dLike');
+  if (dl) dl.classList.toggle('on', isLiked(v.vod_id));
+}
+
+async function openDetail(id, autoplay) {
+  const sheet = $('#sheet');
+  sheet.classList.add('open');
+  requestAnimationFrame(() => requestAnimationFrame(() => sheet.classList.add('in')));
+  const ov = $('#pOverlay'); if (ov) ov.classList.remove('hidden');
+  setPlayerLoading(false);
+  $('#m-lines') && ($('#m-lines').innerHTML = '');
+  $('#epsHost').innerHTML = '';
+  $('#simHost').innerHTML = '';
+
+  let v = S.pool.find(x => String(x.vod_id) === String(id));
+  if (v) {
+    S.item = v;
+    paintDetailMeta(v);
+    renderSimilar(v);
+    $('#epsHost').innerHTML = '<div style="padding:18px 0;color:#888;font-size:13px">正在加载选集…</div>';
+  } else {
+    $('#dTitle').textContent = '加载中…';
+    $('#dMeta').innerHTML = '';
+    $('#dDesc').textContent = '';
+    $('#dCast').textContent = '';
+  }
+
+  try {
+    const j = await cmsFetch(S.site, { ac: 'detail', ids: id });
+    const d = pickList(j)[0];
+    if (d) v = d;
+  } catch (e) {
+    toast('详情加载失败：' + e.message);
+  }
+  if (!v) { toast('没有拿到详情'); return; }
+  S.item = v;
+
+  paintDetailMeta(v);
+
   S.lines = parsePlayUrls(v.vod_play_from, v.vod_play_url);
   // 别盲选第一条：很多源的线路顺序里，第一条是「/share/xxx」这类网页解析地址，
   // 拿它当视频流必失败。优先挑真正给 m3u8/mp4 直链的线路。
@@ -2802,27 +3363,24 @@ async function openDetail(id, autoplay) {
   renderEpisodes();
   renderSimilar(v);
 
-  $('#pImg').src = wideOf(v);
-  $('#pImg').onerror = () => { $('#pImg').src = fallbackArt(v.vod_id || 'x', 960, 540, '', v.vod_name || ''); };
-
-  $('#dList').classList.toggle('on', isFav(v.vod_id));
-  $('#dList').innerHTML = isFav(v.vod_id)
-    ? '<svg class="icon-20" viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></svg>'
-    : '<svg class="icon-20" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
-
-  if (autoplay && S.lines.length) playEp(0, 0);
+  if (autoplay && S.lines.length) {
+    const rec = loadHist()[srcKey(S.site) + '::' + v.vod_id];
+    const eps = (S.lines[S.lineIdx] && S.lines[S.lineIdx].episodes) || [];
+    const startEp = (rec && rec.epIdx >= 0 && rec.epIdx < eps.length) ? rec.epIdx : 0;
+    playEp(S.lineIdx, startEp);
+  }
 }
 
 function renderLines() {
   const host = $('#m-lines');
   if (!host) return;
   host.innerHTML = '';
-  if (!S.lines.length) { host.innerHTML = `<div style="color:#808080;font-size:12.5px">没有解析出可播放线路</div>`; return; }
+  if (!S.lines.length) { host.innerHTML = `<div style="color:#888;font-size:12.5px">没有解析出可播放线路</div>`; return; }
   S.lines.forEach((l, i) => {
-    const b = el('button', i === S.lineIdx ? 'on' : '');
+    const direct = l.episodes && l.episodes.some(e => e.url && /(\.m3u8|\.mp4)(\?|$)/i.test(e.url));
+    const cls = 'line-pill' + (i === S.lineIdx ? ' on' : '') + (direct ? ' direct' : '');
+    const b = el('button', cls);
     b.textContent = `${l.name}（${l.episodes.length}）`;
-    b.style.cssText = 'padding:7px 12px;border-radius:8px;font-size:12.5px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#D2D2D2';
-    if (i === S.lineIdx) b.style.cssText = 'padding:7px 12px;border-radius:8px;font-size:12.5px;border:1px solid #fff;background:#fff;color:#000;font-weight:700';
     b.onclick = () => { S.lineIdx = i; S.epIdx = -1; renderLines(); renderEpisodes(); };
     host.appendChild(b);
   });
@@ -2837,7 +3395,8 @@ function renderEpisodes() {
   const rec = S.item ? loadHist()[srcKey(S.site) + '::' + S.item.vod_id] : null;
 
   line.episodes.forEach((ep, i) => {
-    const row = el('div', 'ep');
+    const isPlaying = S.epIdx === i;
+    const row = el('div', 'ep' + (isPlaying ? ' playing' : ''));
     const done = rec && rec.epIdx === i;
     row.innerHTML = `
       <div class="ep-n">${i + 1}</div>
@@ -2848,7 +3407,7 @@ function renderEpisodes() {
       <div class="ep-body">
         <div class="ep-t">
           <span class="t">${esc(ep.label)}</span>
-          <span class="dur">${done ? '看过' : ''}</span>
+          <span class="dur">${isPlaying ? '播放中' : (done ? '上次看到' : '')}</span>
         </div>
         <p class="ep-d">${esc(String(S.item.vod_blurb || S.item.vod_content || '').replace(/<[^>]+>/g, '').slice(0, 40))}</p>
       </div>`;
@@ -3409,9 +3968,13 @@ function closeSrcMgmt() {
 /* ── 渲染 ── */
 function renderSrcMgmt() {
   const custom = loadCustomSources();
+  const builtin = SITES.filter(s => !s.custom);
   const host = $('#srcCustomList');
+  const bHost = $('#srcBuiltinList');
   const cnt = $('#srcCount');
-  if (cnt) cnt.textContent = custom.length ? `${custom.length} 个自定义` : '仅内置 4 个';
+  if (cnt) cnt.textContent = custom.length
+    ? `内置 ${builtin.length} 个 · 自定义 ${custom.length} 个`
+    : `内置 ${builtin.length} 个`;
 
   if (host) {
     host.innerHTML = '';
@@ -3419,13 +3982,26 @@ function renderSrcMgmt() {
       host.innerHTML = '<div class="src-empty">还没有自定义源</div>';
     } else {
       custom.forEach((s, i) => {
+        const isCur = S.site.key === s.key;
         const row = el('div', 'src-row');
         row.innerHTML = `
           <div class="src-row-main">
             <b>${esc(s.name || '未命名')}</b>
             <span>${esc(s.api)}</span>
           </div>
+          ${isCur ? '<span class="src-badge-cur">当前使用</span>' : '<button class="src-row-use">切换</button>'}
           <button class="src-row-del" data-i="${i}">删除</button>`;
+        const useBtn = row.querySelector('.src-row-use');
+        if (useBtn) useBtn.onclick = () => {
+          const target = SITES.find(x => x.key === s.key);
+          if (target) {
+            S.site = target;
+            syncSrcLabel();
+            renderSrcMgmt();
+            loadHome(target);
+            toast(`已切换到「${target.name}」`);
+          }
+        };
         row.querySelector('.src-row-del').onclick = async () => {
           const ok = await confirmDialog('删除片源', `确定删除「${s.name}」吗？`, '删除');
           if (!ok) return;
@@ -3447,6 +4023,29 @@ function renderSrcMgmt() {
         host.appendChild(row);
       });
     }
+  }
+
+  if (bHost) {
+    bHost.innerHTML = '';
+    builtin.forEach(s => {
+      const isCur = S.site.key === s.key;
+      const row = el('div', 'src-row');
+      row.innerHTML = `
+        <div class="src-row-main">
+          <b>${esc(s.name)}</b>
+          <span>内置片源 · ${esc(s.key)}</span>
+        </div>
+        ${isCur ? '<span class="src-badge-cur">当前使用</span>' : '<button class="src-row-use">切换</button>'}`;
+      const useBtn = row.querySelector('.src-row-use');
+      if (useBtn) useBtn.onclick = () => {
+        S.site = s;
+        syncSrcLabel();
+        renderSrcMgmt();
+        loadHome(s);
+        toast(`已切换到「${s.name}」`);
+      };
+      bHost.appendChild(row);
+    });
   }
 
   renderMagnets();
@@ -3803,14 +4402,16 @@ async function playEp(lineIdx, epIdx, isAuto) {
     box.appendChild(vid);
   }
   const img = $('#pImg'); if (img) img.style.display = 'none';
+  const ov = $('#pOverlay'); if (ov) ov.classList.add('hidden');
 
   killPlayer();
+  setPlayerLoading(true, `正在连接「${line.name}」…`);
   player = vid;
   const url = ep.url;
   // 记下原始地址：投屏要用它（本地代理地址电视访问不到）
   S.playUrl = url;
   S.playTitle = (S.item ? S.item.vod_name : '') + ' · ' + ep.label;
-  say(`播放 ${ep.label} · ${line.name}`);
+  say(`播放 ${ep.label} · ${line.name}`, 'loading');
 
   const isM3u8 = /\.m3u8(\?|$)/i.test(url) || /\/api\/hls\?/i.test(url);
   const isDirect = /(\.m3u8|\.mp4)(\?|$)/i.test(url);
@@ -3818,44 +4419,58 @@ async function playEp(lineIdx, epIdx, isAuto) {
   // 有些线路给的是「/share/xxxx」这种网页解析页，不是视频流 —— 塞进 player 只会空转。
   // 直接判失败，立刻走换线路，不让用户干等 8 秒。
   if (!isDirect && !/\/api\/hls\?/i.test(url)) {
-    say('这条线路是网页解析地址，换下一条…');
+    say('这条线路是网页解析地址，换下一条…', 'loading');
     onPlaybackError('not-media');
     return;
   }
 
   // ── 起播前预检 ──
-  // 采集站的视频域名经常整片失效（实测暴风 6 部里 5 部的域名 DNS 都解析不了）。
-  // 不预检的话，播放器会去打一个死域名，等 11 秒超时才换源，表现就是「播一下就卡一下」。
-  // 这里先花最多 2 秒确认清单能拿到，拿不到立刻换线路/换源。
-  say(`检查线路「${line.name}」…`);
-  try {
-    const chk = new AbortController();
-    const chkTimer = setTimeout(() => chk.abort(), 2000);
-    const probeUrl = isM3u8 ? API.hls(url) : API.proxy(url);
-    const pr = await fetch(probeUrl, { signal: chk.signal, headers: { Range: 'bytes=0-2048' } });
-    clearTimeout(chkTimer);
-    if (!pr.ok) {
-      onPlaybackError('precheck:' + pr.status);
+  // HLS 交给 hls.js 直接拉清单（manifestLoadingTimeOut=4s，失败即刻走 ERROR 回调），
+  // 省掉一次重复的 /api/hls 请求，降低起播延迟；仅对直链 .mp4 做 2 秒 Range 探测。
+  if (!isM3u8 || !window.Hls || !window.Hls.isSupported()) {
+    say(`检查线路「${line.name}」…`, 'loading');
+    try {
+      const chk = new AbortController();
+      const chkTimer = setTimeout(() => chk.abort(), 2000);
+      const pr = await fetch(API.proxy(url), { signal: chk.signal, headers: { Range: 'bytes=0-2048' } });
+      clearTimeout(chkTimer);
+      if (!pr.ok) {
+        onPlaybackError('precheck:' + pr.status);
+        return;
+      }
+    } catch (e) {
+      if (token === S.playToken) onPlaybackError('precheck:' + (e.name === 'AbortError' ? 'timeout' : (e.cause?.code || 'fail')));
       return;
     }
-  } catch (e) {
-    // 超时或域名解析失败 —— 直接换，别让播放器去撞
-    if (token === S.playToken) onPlaybackError('precheck:' + (e.name === 'AbortError' ? 'timeout' : (e.cause?.code || 'fail')));
-    return;
   }
+
+  setPlayerLoading(true, '正在缓冲视频…');
+  const ctl = new AbortController();
+  S.playCtl = ctl;
 
   if (isM3u8 && window.Hls && window.Hls.isSupported()) {
     const src = API.hls(url);
-    // 缓冲调大 + 提高初始带宽估计：CDN 不给力时，多缓冲几个分片比反复卡顿强。
-    // abrEwmaDefaultEstimate 默认只有 500kbps，会让它一开始就挑低码率甚至来不及取片。
+    // 加大前向缓冲 + 开启下一分片预取 + 容忍 CMS 轻微 PTS 空洞，减少播放中卡顿加载
     hls = new window.Hls({
-      maxBufferLength: 60,
-      maxMaxBufferLength: 120,
-      maxBufferSize: 60 * 1000 * 1000,
-      manifestLoadingMaxRetry: 3,
-      levelLoadingMaxRetry: 3,
-      fragLoadingMaxRetry: 4,
-      abrEwmaDefaultEstimate: 2000000,
+      maxBufferLength: 90,
+      maxMaxBufferLength: 180,
+      maxBufferSize: 90 * 1000 * 1000,
+      backBufferLength: 30,
+      startFragPrefetch: true,
+      maxBufferHole: 1.5,
+      nudgeOffset: 0.2,
+      nudgeMaxRetry: 6,
+      abrEwmaDefaultEstimate: 5000000,
+      manifestLoadingTimeOut: 4000,
+      manifestLoadingMaxRetry: 1,
+      manifestLoadingRetryDelay: 300,
+      levelLoadingTimeOut: 6000,
+      levelLoadingMaxRetry: 2,
+      levelLoadingRetryDelay: 300,
+      fragLoadingTimeOut: 8000,
+      fragLoadingMaxRetry: 3,
+      fragLoadingRetryDelay: 300,
+      fragLoadingMaxRetryTimeout: 4000,
     });
     // 关键：hls.js 只负责把流灌进 <video>，不会自己 play。
     // 少了这一句，表现就是「加载出来了但停在 0:00」。
@@ -3866,8 +4481,13 @@ async function playEp(lineIdx, epIdx, isAuto) {
     hls.loadSource(src);
     hls.attachMedia(vid);
     hls.on(window.Hls.Events.ERROR, (evt, data) => {
-      if (token !== S.playToken) return;      // 已经是旧的播放了
-      if (!data || !data.fatal) return;
+      if (token !== S.playToken || !data) return;
+      if (!data.fatal) {
+        if (data.details === 'bufferStalledError' && !vid.paused) {
+          try { hls.startLoad(); } catch (e) {}
+        }
+        return;
+      }
       onPlaybackError('hls:' + data.type);
     });
   } else {
@@ -3877,42 +4497,41 @@ async function playEp(lineIdx, epIdx, isAuto) {
   }
 
   // ── 卡住检测 ──
-  // 两个阶段都要管：
-  //  a) 起播阶段：15 秒还出不了画面 → 换源
-  //  b) 播放中途：进入 waiting（缓冲）超过 12 秒 → 换源
-  //  以前只在起播时设一次定时器，canplay 一到就清掉，中途卡死就再也没人管了。
   const armStall = (ms, label) => {
     clearTimeout(S.stallTimer);
     S.stallTimer = setTimeout(() => {
-      if (token !== S.playToken) return;
-      if (vid.readyState < 2 || (vid.currentTime === 0 && vid.paused === false) || vid.readyState < 3) {
+      if (token !== S.playToken || vid.paused) return;
+      if (vid.readyState < 2 || vid.currentTime === 0 || vid.readyState < 3) {
         onPlaybackError(label);
       }
     }, ms);
   };
 
-  // 起播只等 8 秒（原来 15 秒太久，用户会以为卡死）；中途缓冲等 12 秒
   armStall(8000, 'stalled');
 
   vid.addEventListener('canplay', () => {
     if (token !== S.playToken) return;
     clearTimeout(S.stallTimer);
-  }, { once: true });
+    setPlayerLoading(false);
+    say(`正在播放 · ${ep.label}`);
+  }, { once: true, signal: ctl.signal });
 
-  // 播放中缓冲：等 3 秒确认不是瞬间抖动，再起 12 秒的超时
+  // 播放中缓冲：仅在非暂停状态下计时，避免手动暂停误触发换源
   vid.addEventListener('waiting', () => {
-    if (token !== S.playToken) return;
+    if (token !== S.playToken || vid.paused) return;
+    setPlayerLoading(true, '正在缓冲…');
     clearTimeout(S.stallTimer);
     S.stallTimer = setTimeout(() => {
-      if (token !== S.playToken) return;
+      if (token !== S.playToken || vid.paused) return;
       if (vid.readyState < 3) onPlaybackError('stalled-mid');
     }, 12000);
-  });
+  }, { signal: ctl.signal });
 
   vid.addEventListener('playing', () => {
     if (token !== S.playToken) return;
     clearTimeout(S.stallTimer);
-  });
+    setPlayerLoading(false);
+  }, { signal: ctl.signal });
 
   vid.onloadedmetadata = () => {
     const rec = S.item ? loadHist()[srcKey(S.site) + '::' + S.item.vod_id] : null;
@@ -3982,6 +4601,8 @@ async function doSearch(q) {
 function renderPills() {
   const wrap = $('#pills');
   if (!wrap) return;
+  wrap.classList.remove('collapsed');
+  $$('.pill[data-pill="type"]', wrap).forEach(x => x.classList.remove('on'));
 
   /* 左边的 ✕：清除类型筛选，回到全部 */
   const reset = $('#pillReset');
@@ -3989,6 +4610,7 @@ function renderPills() {
     wrap.classList.remove('collapsed');
     $$('.pill[data-pill="type"]', wrap).forEach(x => x.classList.remove('on'));
     S.cat = '';
+    syncMobileCatPill('');
     toast('已重置筛选');
     loadHome(S.site);
   };
@@ -4002,21 +4624,16 @@ function renderPills() {
       // 再点一次就是取消筛选 → 回到全部
       if (on) {
         S.cat = '';
+        syncMobileCatPill('');
         loadHome(S.site);
         return;
       }
 
-      /* 把「剧集 / 电影」映射到该源真实分类的 type_id，
-         再交给 filterByCat —— 它会自动合并该父分类下的所有子分类 */
-      const tName = p.dataset.v;
-      const cat = (S.cats || []).find(c => String(c.type_name || '').includes(tName));
-      const tid = cat ? cat.type_id : '';
-
-      if (!tid) {
-        toast(`当前源没有「${tName}」这个分类`);
-        return;
+      const ok = await filterByTypeName(p.dataset.v);
+      if (!ok) {
+        p.classList.remove('on');
+        wrap.classList.remove('collapsed');
       }
-      await filterByCat(tid, null, tName);
     };
   });
 }
@@ -4104,6 +4721,17 @@ function observeNH() {
    UI 绑定
    ══════════════════════════════════════════════════════════ */
 let toastT2 = null;
+function playCurrentDetail() {
+  if (!S.lines.length) { toast('没有可播放线路'); return; }
+  const eps = (S.lines[S.lineIdx] && S.lines[S.lineIdx].episodes) || [];
+  let ep = S.epIdx;
+  if (ep < 0 && S.item) {
+    const rec = loadHist()[srcKey(S.site) + '::' + S.item.vod_id];
+    if (rec && rec.epIdx >= 0 && rec.epIdx < eps.length) ep = rec.epIdx;
+  }
+  playEp(S.lineIdx, ep >= 0 && ep < eps.length ? ep : 0);
+}
+
 function bindUI() {
   /* 源切换：自定义按钮 + 底部抽屉（不再用 <select>，避免系统原生弹窗） */
   syncSrcLabel();
@@ -4111,22 +4739,56 @@ function bindUI() {
   const sb2 = $('#srcBtnM'); if (sb2) sb2.onclick = openSrcSheet;
   $$('#srcSheet [data-src-close]').forEach(b => b.onclick = closeSrcSheet);
 
+  /* Logo 回到首页 / 刷新按钮 */
+  const goHome = () => {
+    switchTab('home', 'home');
+    if (S.cat || S.query) loadHome(S.site);
+  };
+  const lh1 = $('#logoHome'); if (lh1) lh1.onclick = goHome;
+  const lh2 = $('#logoHomeM'); if (lh2) lh2.onclick = goHome;
+  const refBtn = $('#refreshBtn');
+  if (refBtn) refBtn.onclick = () => {
+    CMS_CACHE.clear();
+    switchTab('home', 'home');
+    loadHome(S.site);
+    toast(`已刷新「${S.site.name}」`);
+  };
+
   /* 搜索：统一走搜索视图，不再用原生 prompt 弹窗 */
   const sd = $('#searchD');
+  const si = $('#searchInput');
+  const sClr = $('#searchClear');
+  const syncSearchClear = () => { if (sClr && si) sClr.hidden = !si.value; };
   if (sd) sd.onkeydown = (e) => {
     if (e.key !== 'Enter') return;
     const q = sd.value.trim();
     if (!q) return;
     switchTab('search');
-    const si2 = $('#searchInput'); if (si2) si2.value = q;
+    if (si) { si.value = q; syncSearchClear(); }
     doSearchView(q);
   };
   const sm = $('#searchM');
   if (sm) sm.onclick = () => switchTab('search');
-  const si = $('#searchInput');
-  if (si) si.onkeydown = (e) => { if (e.key === 'Enter') doSearchView(si.value); };
+  if (si) {
+    si.oninput = syncSearchClear;
+    si.onkeydown = (e) => { if (e.key === 'Enter') doSearchView(si.value); };
+  }
+  if (sClr) sClr.onclick = () => {
+    if (si) { si.value = ''; si.focus(); }
+    if (sd) sd.value = '';
+    S.query = '';
+    syncSearchClear();
+    const res = $('#searchResult'); if (res) res.innerHTML = '';
+    const hint = $('#searchHint'); if (hint) { hint.style.display = ''; hint.textContent = '输入片名后回车'; }
+  };
   const sg = $('#searchGo');
-  if (sg) sg.onclick = () => doSearchView(si.value);
+  if (sg) sg.onclick = () => doSearchView(si ? si.value : '');
+  const shClr = $('#searchHistClear');
+  if (shClr) shClr.onclick = () => {
+    saveJson(SEARCH_HIST_KEY, []);
+    renderSearchHist();
+    toast('已清空搜索历史');
+  };
 
   /* 类别胶囊 → 分类遮罩 */
   const catPill = $('.pill[data-pill="cat"]');
@@ -4140,18 +4802,23 @@ function bindUI() {
     });
   }
 
-  /* 导航胶囊 */
+  /* 桌面导航胶囊 */
   $$('[data-nav]').forEach(b => {
-    b.onclick = () => {
-      $$('[data-nav]').forEach(x => x.classList.toggle('on', x === b));
-      const t = b.textContent.trim();
-      if (t === '主页' || t === '剧集' || t === '电影') {
+    b.onclick = async () => {
+      const k = b.dataset.nav;
+      if (k === 'home') {
+        switchTab('home', 'home');
         loadHome(S.site);
-      } else if (t === '新片与热门') {
-        document.body.dataset.tab = 'newhot';
-        renderNewHot();
-      } else {
-        toast(t);
+      } else if (k === 'tv' || k === 'movie') {
+        switchTab('home', k);
+        const ok = await filterByTypeName(k === 'tv' ? '剧集' : '电影');
+        if (!ok) setDesktopNav(S.cat ? '' : 'home');
+      } else if (k === 'fav') {
+        meTab = 'fav';
+        switchTab('me', 'fav');
+      } else if (k === 'hist') {
+        meTab = 'hist';
+        switchTab('me', 'hist');
       }
     };
   });
@@ -4161,10 +4828,23 @@ function bindUI() {
     t.onclick = () => switchTab(t.dataset.tab);
   });
 
-  /* 我的：历史 / 收藏 / 改名 / 头像 */
+  /* 我的：历史 / 收藏 / 清空历史 / 改名 / 头像 */
   $$('.metabs button').forEach(b => {
-    b.onclick = () => { meTab = b.dataset.metab; renderMe(); };
+    b.onclick = () => {
+      meTab = b.dataset.metab;
+      setDesktopNav(meTab === 'fav' ? 'fav' : 'hist');
+      renderMe();
+    };
   });
+  const meClr = $('#meClearHist');
+  if (meClr) meClr.onclick = async () => {
+    const ok = await confirmDialog('清空观看历史', '确定要清空全部观看记录吗？此操作无法撤销。', '清空');
+    if (!ok) return;
+    try { localStorage.removeItem(HKEY); } catch (e) {}
+    renderMe();
+    if (!S.cat && !S.query) renderRows();
+    toast('已清空观看历史');
+  };
   const meEdit = $('#meEdit');
   if (meEdit) meEdit.onclick = () => {
     const nm = $('#meName');
@@ -4195,10 +4875,7 @@ function bindUI() {
   const av = $('.avatar');
   if (av) {
     av.style.cursor = 'pointer';
-    av.onclick = () => {
-      if (inMobile()) switchTab('me');
-      else toast(`${getName()} · 看过 ${histList().length} 部 · 收藏 ${favList().length} 部`);
-    };
+    av.onclick = () => switchTab('me');
   }
 
   /* 我的页头像 → 上传自定义图片 */
@@ -4235,6 +4912,8 @@ function bindUI() {
   if (lmBtn) lmBtn.onclick = loadMore;
   const nextCancelBtn = $('#nextCancel');
   if (nextCancelBtn) nextCancelBtn.onclick = cancelNext;
+  const pOv = $('#pOverlay');
+  if (pOv) pOv.onclick = playCurrentDetail;
   initRate();
   initGestures();
 
@@ -4337,10 +5016,18 @@ function bindUI() {
     if (e.target === inpMaskEl) settleInput(null);
   });
 
-  /* 详情关闭 */
+  /* 详情关闭 + Esc 按最顶层弹窗依次关闭 */
   $$('#sheet [data-close]').forEach(b => b.onclick = closeDetail);
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeDetail();
+    if (e.key !== 'Escape') return;
+    if ($('#inpMask')?.classList.contains('open')) { settleInput(null); return; }
+    if ($('#cfmMask')?.classList.contains('open')) { settleConfirm(false); return; }
+    if ($('#updMask')?.classList.contains('open')) { closeUpdateDialog(); return; }
+    if ($('#castHelp')?.classList.contains('open')) { $('#castHelp')?.classList.remove('open'); return; }
+    if ($('#castMask')?.classList.contains('open')) { closeCastSheet(); return; }
+    if ($('#srcSheet')?.classList.contains('open')) { closeSrcSheet(); return; }
+    if ($('#catMask')?.classList.contains('open')) { closeCatMask(); return; }
+    if ($('#sheet')?.classList.contains('open')) { closeDetail(); }
   });
 
   /* 详情 Tab */
@@ -4364,24 +5051,35 @@ function bindUI() {
     if (b.closest('#sheet') || b.closest('.card') || b.closest('.nh-item')) return;
     b.onclick = heroInfo;
   });
-  $$('[data-act="list"]').forEach(b => { b.onclick = () => toast('片单功能未接入'); });
+  $$('[data-act="list"]').forEach(b => {
+    if (b.closest('#sheet') || b.closest('.card')) return;
+    b.onclick = () => { if (S.hero) toggleFav(S.hero); };
+  });
 
-  /* 详情里的播放/下载 */
+  /* 详情里的播放 / 收藏 / 点赞 / 分享 */
   $('#sheet').addEventListener('click', (e) => {
     const b = e.target.closest('[data-act]');
     if (!b) return;
     const a = b.dataset.act;
-    if (a === 'play') { if (S.lines.length) playEp(0, 0); else toast('没有可播放线路'); }
-    else if (a === 'dl') toast('暂不支持离线下载');
-    else if (a === 'share') toast('链接已复制');
-    else if (a === 'like') { b.classList.toggle('on'); toast('已记录'); }
+    if (a === 'play') { playCurrentDetail(); }
+    else if (a === 'share') {
+      if (!S.item) return;
+      const shareText = `《${S.item.vod_name}》${S.playUrl ? ' ' + S.playUrl : ''}`;
+      const done = () => toast('已复制影片信息');
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareText).then(done).catch(() => fallbackCopy(shareText, done));
+      } else {
+        fallbackCopy(shareText, done);
+      }
+    }
+    else if (a === 'like') {
+      if (!S.item) return;
+      const on = toggleLike(S.item.vod_id);
+      b.classList.toggle('on', on);
+    }
     else if (a === 'list') {
       if (!S.item) return;
-      const on = toggleFav(S.item);
-      b.classList.toggle('on', on);
-      b.querySelector('svg').outerHTML = on
-        ? '<svg class="icon-20" viewBox="0 0 24 24"><path d="m5 13 4 4L19 7"/></svg>'
-        : '<svg class="icon-20" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+      toggleFav(S.item);
     }
   });
 
@@ -4398,7 +5096,7 @@ function bindUI() {
         document.body.dataset.device = next;
         const lbl = $('#devLabel');
         if (lbl) lbl.textContent = next === 'mobile' ? '切回桌面端' : '切到手机端';
-        if (next === 'mobile') { scrollToTop(false); observeNH(); }
+        if (next === 'mobile') scrollToTop(false);
       };
     }
   }
@@ -4437,7 +5135,9 @@ function closeDetail() {
   setTimeout(() => sheet.classList.remove('open'), 320);
   const vt = $('#mv'); if (vt) vt.remove();
   const img = $('#pImg'); if (img) img.style.display = '';
-  if (S.item) { renderRows(); }
+  const ov = $('#pOverlay'); if (ov) ov.classList.remove('hidden');
+  if (S.item && !S.cat && !S.query) renderRows();
+  if ($('#view-me') && !$('#view-me').hidden) renderMe();
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -4466,7 +5166,7 @@ async function boot() {
   if (!ok) {
     for (let i = 1; i < SITES.length; i++) {
       const r = await loadHome(SITES[i]);
-      if (r) { const sel = $('#siteSel'); if (sel) sel.value = String(i); const selM = $('#siteSelM'); if (selM) selM.value = String(i); break; }
+      if (r) { syncSrcLabel(); break; }
     }
   }
   renderNewHot = null;
