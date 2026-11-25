@@ -1533,7 +1533,7 @@ body[data-real="mobile"] #devToggle{display:none !important}
 [hidden]{display:none !important}
 
 </style>
-<meta name="qimu-version" content="27">
+<meta name="qimu-version" content="28">
 </head>
 <body data-device="desktop" data-tab="home">
 
@@ -2010,22 +2010,21 @@ body[data-real="mobile"] #devToggle{display:none !important}
    ══════════════════════════════════════════════════════════ */
 
 const SITES = [
-  // 顺序按 2026-11 实测排的：播放可用率 40% + 片量 35% + 接口速度 25%
+  // 顺序说明（2026-11-25 实测）：
   //
-  //   量子    16.4万  673ms   5/5   ← 默认
-  //   索尼    14.9万  1477ms  5/5
-  //   极速    11.7万  1001ms  5/5
-  //   电影天堂 8.5万   608ms   5/5
-  //   非凡    9.9万   1427ms  5/5（分片最快 393ms）
-  //   最大资源 12.6万  983ms   1/5
-  //   暴风    17.3万  2093ms  0/5  ← 片量最多但域名全失效，放最后
+  // 直连可用性受 DNS 污染影响 —— 量子/非凡/索尼/暴风 的域名被投毒成假 IP
+  // （4 个公共 DNS 都返回同一个错误 IP），手机直连必然失败。
+  // 极速和最大资源走 Cloudflare，解析正常，直连可用。
+  //
+  // 所以极速排第一：它在「直连可用 + 播放 5/5」里是唯一一个。
+  // 有代理的环境（网页版）会在失败后自动回落到量子等片量更大的源。
+  { key: 'js',   name: '极速资源', api: 'https://jszyapi.com/api.php/provide/vod/at/json' },
+  { key: 'zd',   name: '最大资源', api: 'https://api.zuidapi.com/api.php/provide/vod/' },
   { key: 'lz',   name: '量子资源', api: 'https://cj.lziapi.com/api.php/provide/vod/' },
   { key: 'ff',   name: '非凡资源', api: 'https://cj.ffzyapi.com/api.php/provide/vod/at/json' },
   { key: 'sn',   name: '索尼资源', api: 'https://suoniapi.com/api.php/provide/vod/at/json/' },
-  { key: 'js',   name: '极速资源', api: 'https://jszyapi.com/api.php/provide/vod/at/json' },
   { key: 'dytt', name: '电影天堂', api: 'https://caiji.dyttzyapi.com/api.php/provide/vod/' },
   { key: 'bf',   name: '暴风资源', api: 'https://bfzyapi.com/api.php/provide/vod/' },
-  { key: 'zd',   name: '最大资源', api: 'https://api.zuidapi.com/api.php/provide/vod/' },
 ];
 
 const API = {
@@ -3320,6 +3319,29 @@ async function loadHome(site, opts) {
     S.lastErr = e && e.message ? e.message : '网络错误';
     say(`${S.site.name} 加载失败：${S.lastErr}`, 'err');
     S.loading = false;
+
+    // 自动换源：这个源连不上就依次试别的。
+    // 手机直连时部分源被 DNS 投毒，靠这个兜底不让用户看到一片空白。
+    // 每个候选只等 6 秒（正常源 1 秒内就回来），避免串行等成 140 秒。
+    if (!(opts && opts.noFallback)) {
+      const tried = (opts && opts.tried) || [S.site.key];
+      const rest = SITES.filter(s => !tried.includes(s.key)).slice(0, 4);
+      for (const s of rest) {
+        say(`${S.site.name} 连不上，试 ${s.name}…`, 'loading');
+        const ok = await loadHome(s, {
+          ...opts,
+          noFallback: true,
+          silentFail: true,
+          timeout: 6000,
+          tried: [...tried, s.key],
+        });
+        if (ok) {
+          toast(`已自动切换到 ${s.name}`);
+          return true;
+        }
+      }
+    }
+
     if (!(opts && opts.silentFail) && !S.pool.length) {
       renderRowsError(`${S.site.name} 加载失败`, S.lastErr);
     }
