@@ -4,11 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>启幕</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com" async></script>
-<script src="https://unpkg.com/lucide@latest" async></script>
 <style>
 /* ══════════════════════════════════════════════════════════
    1. 设计令牌
@@ -43,8 +38,8 @@
   --ambient:rgba(180,20,30,.45);
   --nav-h:68px;
   /* 字体 */
-  --font-display:'Plus Jakarta Sans','HarmonyOS Sans SC','Noto Sans SC',-apple-system,BlinkMacSystemFont,sans-serif;
-  --font-body:'Plus Jakarta Sans','HarmonyOS Sans SC','Noto Sans SC',-apple-system,BlinkMacSystemFont,sans-serif;
+  --font-display:'HarmonyOS Sans SC','PingFang SC','Microsoft YaHei','Noto Sans SC',-apple-system,BlinkMacSystemFont,sans-serif;
+  --font-body:'HarmonyOS Sans SC','PingFang SC','Microsoft YaHei','Noto Sans SC',-apple-system,BlinkMacSystemFont,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
@@ -1470,6 +1465,18 @@ body[data-real="mobile"] .nh{padding-bottom:calc(72px + env(safe-area-inset-bott
   color:var(--fg3);font-size:13.5px;line-height:1.7;
 }
 .empty-box svg{width:32px;height:32px;margin:0 auto 10px;opacity:.45;stroke:currentColor;fill:none;stroke-width:1.6}
+.err-box .err-title{font-size:15px;font-weight:700;color:#fff;margin-bottom:6px}
+.err-box .err-detail{font-size:12.5px;color:var(--fg3);margin-bottom:18px;word-break:break-word;max-width:520px;margin-left:auto;margin-right:auto}
+.err-box .err-acts{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.err-btn{
+  height:36px;padding:0 20px;border-radius:9999px;font-size:13px;font-weight:700;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#fff;
+  transition:background .18s var(--ease),transform .15s;
+}
+.err-btn:hover{background:rgba(255,255,255,.2)}
+.err-btn:active{transform:scale(.96)}
+.err-btn.primary{background:var(--red);border-color:var(--red)}
+.err-btn.primary:hover{background:var(--red-hover)}
 
 /* 搜索结果 / 历史 / 收藏 的网格：用 ID 压过 .grid 的默认列定义 */
 #searchResult,#meHist,#meFav{
@@ -1526,7 +1533,7 @@ body[data-real="mobile"] #devToggle{display:none !important}
 [hidden]{display:none !important}
 
 </style>
-<meta name="qimu-version" content="25">
+<meta name="qimu-version" content="26">
 </head>
 <body data-device="desktop" data-tab="home">
 
@@ -2100,38 +2107,58 @@ function fallbackArt(seedStr, w, h, en, cn) {
  * 暴风的 p.bfp261112.com 这类域名在部分网络下根本连不上，
  * 不记住的话每张卡都要白试一遍（一次 8 秒超时），20 张就是 40 个无效请求。
  */
-const DEAD_PIC_HOSTS = new Set();
-const DEAD_PIC_KEY = 'qimu.deadpic.v1';
-// 上次启动时判定不可达的图床，直接记住——只有第一次需要探测
+const DEAD_PIC_HOSTS = new Map();     // host -> expireTs（30 分钟后自动重试，避免瞬时抖动永久拉黑）
+const DEAD_PIC_KEY = 'qimu.deadpic.v2';
+const DEAD_PIC_TTL = 30 * 60 * 1000;
 try {
-  const saved = JSON.parse(localStorage.getItem(DEAD_PIC_KEY) || '[]');
-  if (Array.isArray(saved)) saved.forEach(h => DEAD_PIC_HOSTS.add(h));
+  const saved = JSON.parse(localStorage.getItem(DEAD_PIC_KEY) || '{}');
+  const now = Date.now();
+  if (saved && typeof saved === 'object' && !Array.isArray(saved)) {
+    Object.keys(saved).forEach(h => {
+      if (Number(saved[h]) > now) DEAD_PIC_HOSTS.set(h, Number(saved[h]));
+    });
+  }
 } catch (e) {}
 
-function saveDeadPicHosts() {
-  try { localStorage.setItem(DEAD_PIC_KEY, JSON.stringify([...DEAD_PIC_HOSTS])); } catch (e) {}
+function isDeadPicHost(host) {
+  if (!host) return false;
+  const exp = DEAD_PIC_HOSTS.get(host);
+  if (!exp) return false;
+  if (exp <= Date.now()) { DEAD_PIC_HOSTS.delete(host); return false; }
+  return true;
+}
+
+function markDeadPicHost(host) {
+  if (!host) return;
+  DEAD_PIC_HOSTS.set(host, Date.now() + DEAD_PIC_TTL);
+  try {
+    const obj = {};
+    const now = Date.now();
+    DEAD_PIC_HOSTS.forEach((exp, k) => { if (exp > now) obj[k] = exp; });
+    localStorage.setItem(DEAD_PIC_KEY, JSON.stringify(obj));
+  } catch (e) {}
 }
 
 /**
  * 探测当前源的图床是否可达。
- * 不做这一步的话，20 张卡会同时发出 40 个注定失败的请求（每张试 2 次、各等 8 秒），
- * 黑名单要等第一张失败才生效，帮不上忙。先花 1 个请求把结论定下来。
+ * 不发 Range 头（部分图床对 Range 返回 403/416），给足 4 秒超时，拿到响应头即中止响应体。
  */
 async function probePicHost(list) {
   const v = (list || []).find(x => x.vod_pic && /^https?:\/\//i.test(x.vod_pic));
   if (!v) return;
   const host = picHostOf(v.vod_pic);
-  if (!host || DEAD_PIC_HOSTS.has(host)) return;
+  if (!host || isDeadPicHost(host)) return;
   const url = picNeedsExt(v.vod_pic) ? v.vod_pic + '.webp' : v.vod_pic;
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 4000);
   try {
-    const ctl = new AbortController();
-    const timer = setTimeout(() => ctl.abort(), 1500);
-    const r = await fetch(API.proxy(url), { signal: ctl.signal, headers: { Range: 'bytes=0-63' } });
+    const r = await fetch(API.proxy(url), { signal: ctl.signal });
     clearTimeout(timer);
-    if (!r.ok) { DEAD_PIC_HOSTS.add(host); saveDeadPicHosts(); }
+    try { r.body && r.body.cancel(); } catch (e) {}
+    if (!r.ok && r.status !== 416) { markDeadPicHost(host); }
   } catch (e) {
-    DEAD_PIC_HOSTS.add(host);
-    saveDeadPicHosts();
+    clearTimeout(timer);
+    markDeadPicHost(host);
   }
 }
 
@@ -2146,7 +2173,7 @@ function posterOf(v, w = 400, h = 600) {
   const p = String(v && v.vod_pic || '').trim();
   if (/^https?:\/\//i.test(p)) {
     // 这个图床已经证明不可达 → 直接给占位图，不再发请求
-    if (DEAD_PIC_HOSTS.has(picHostOf(p))) {
+    if (isDeadPicHost(picHostOf(p))) {
       return fallbackArt(v && v.vod_id || 'x', w, h, v && v.vod_name || '', '');
     }
     return API.proxy(picNeedsExt(p) ? p + '.webp' : p);
@@ -2157,7 +2184,7 @@ function posterOf(v, w = 400, h = 600) {
 function wideOf(v) {
   const p = String(v && v.vod_pic || '').trim();
   if (/^https?:\/\//i.test(p)) {
-    if (DEAD_PIC_HOSTS.has(picHostOf(p))) {
+    if (isDeadPicHost(picHostOf(p))) {
       return fallbackArt(v && v.vod_id || 'x', 960, 540, v && v.vod_name || '', '');
     }
     return API.proxy(picNeedsExt(p) ? p + '.webp' : p);
@@ -2244,24 +2271,31 @@ async function cmsFetch(site, params, opts) {
     if (CMS_INFLIGHT.has(target)) return CMS_INFLIGHT.get(target);
   }
 
-  const timeoutMs = params && params.wd ? 12000 : 9000;
+  const timeoutMs = (opts && opts.timeout) || (params && params.wd ? 25000 : 20000);
   const run = (async () => {
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), timeoutMs);
-    let r;
+    let r, text;
     try {
       r = await fetch(API.proxy(target), { signal: ctl.signal });
+      text = await r.text();
     } catch (e) {
-      clearTimeout(timer);
       if (e && e.name === 'AbortError') throw new Error('请求超时，请检查网络或切换片源');
-      throw new Error('连不上代理服务（server 没启动？）');
+      throw new Error('连不上本地代理服务');
+    } finally {
+      clearTimeout(timer);
     }
-    clearTimeout(timer);
-    const text = await r.text();
-    if (!r.ok) throw new Error('上游 ' + r.status);
+    if (!r.ok) {
+      let detail = '';
+      try {
+        const ej = JSON.parse(text);
+        if (ej && ej.error) detail = String(ej.error);
+      } catch (e) {}
+      throw new Error(detail ? `上游 ${r.status}（${detail}）` : `上游 ${r.status}`);
+    }
     let j;
     try { j = JSON.parse(text); } catch (e) {
-      throw new Error('返回的不是 JSON：' + text.trim().slice(0, 60));
+      throw new Error('接口返回异常（非 JSON）：' + text.trim().replace(/\s+/g, ' ').slice(0, 60));
     }
     if (j.code != null && Number(j.code) !== 1) throw new Error('接口 code=' + j.code + ' ' + (j.msg || ''));
     if (CMS_CACHE.size > 80) {
@@ -2811,6 +2845,7 @@ async function filterByCat(tid, btn, labelOverride) {
     say(`${label} · ${list.length} 条${extra}`);
   } catch (e) {
     say(`筛选失败：${e.message}`, 'err');
+    renderRowsError(`筛选「${label}」失败`, e.message);
   }
 }
 
@@ -3077,7 +3112,7 @@ function buildCard(v, opts = {}) {
     // 两次都失败 → 判定这个图床不可用，后面同域名的卡直接走占位图
     if (/^https?:\/\//i.test(raw)) {
       const h = picHostOf(raw);
-      if (h && !DEAD_PIC_HOSTS.has(h)) { DEAD_PIC_HOSTS.add(h); saveDeadPicHosts(); }
+      if (h && !isDeadPicHost(h)) { markDeadPicHost(h); }
     }
     picStage = 2;
     clearTimeout(picTimeout);
@@ -3216,10 +3251,30 @@ function renderRows() {
   blocks.forEach(b => host.appendChild(b));
 }
 
+function renderRowsError(title, detail) {
+  const host = $('#rowsHost');
+  if (!host) return;
+  host.innerHTML = '';
+  const box = el('div', 'empty-box err-box');
+  box.style.margin = '16px 4%';
+  box.innerHTML = `
+    <div class="err-title">${esc(title || '加载失败')}</div>
+    ${detail ? `<div class="err-detail">${esc(detail)}</div>` : ''}
+    <div class="err-acts">
+      <button class="err-btn primary" data-err-act="retry">重新加载</button>
+      <button class="err-btn" data-err-act="src">切换片源</button>
+    </div>`;
+  const retryBtn = box.querySelector('[data-err-act="retry"]');
+  if (retryBtn) retryBtn.onclick = () => { CMS_CACHE.clear(); loadHome(S.site); };
+  const srcBtn = box.querySelector('[data-err-act="src"]');
+  if (srcBtn) srcBtn.onclick = openSrcSheet;
+  host.appendChild(box);
+}
+
 /* ══════════════════════════════════════════════════════════
    加载列表
    ══════════════════════════════════════════════════════════ */
-async function loadHome(site) {
+async function loadHome(site, opts) {
   S.site = site || S.site;
   S.cat = '';
   S.query = '';
@@ -3228,7 +3283,7 @@ async function loadHome(site) {
   say(`加载 ${S.site.name}…`, 'loading');
   if (!S.pool.length) renderSkeleton($('#rowsHost'), 2);
   try {
-    const j = await cmsFetch(S.site, { ac: 'list', pg: 1 });
+    const j = await cmsFetch(S.site, { ac: 'list', pg: 1 }, opts);
     const list = pickList(j);
     S.list = list;
     S.pool = list;
@@ -3238,9 +3293,8 @@ async function loadHome(site) {
     S.cats = Array.isArray(j.class) ? j.class : [];
 
     // 图床探测放到后台跑，不挡渲染——首屏优先。
-    // 结论会写进 localStorage，下次启动直接按黑名单走，不用再试。
     const picHost = list[0] && list[0].vod_pic ? picHostOf(list[0].vod_pic) : '';
-    if (picHost && !DEAD_PIC_HOSTS.has(picHost)) {
+    if (picHost && !isDeadPicHost(picHost)) {
       probePicHost(list);
     }
 
@@ -3263,8 +3317,12 @@ async function loadHome(site) {
     S.loading = false;
     return true;
   } catch (e) {
-    say(`${S.site.name} 加载失败：${e.message}`, 'err');
+    S.lastErr = e && e.message ? e.message : '网络错误';
+    say(`${S.site.name} 加载失败：${S.lastErr}`, 'err');
     S.loading = false;
+    if (!(opts && opts.silentFail) && !S.pool.length) {
+      renderRowsError(`${S.site.name} 加载失败`, S.lastErr);
+    }
     return false;
   }
 }
@@ -3284,6 +3342,7 @@ function setPlayerLoading(on, msg) {
 
 function killPlayer() {
   clearTimeout(S.stallTimer);
+  clearTimeout(S.nudgeTimer);
   S.playToken++;                  // 让所有旧回调失效
   if (S.playCtl) { try { S.playCtl.abort(); } catch (e) {} S.playCtl = null; }
   setPlayerLoading(false);
@@ -4308,6 +4367,7 @@ function onPlaybackError(reason) {
   S.failover.busy = true;
   S.failover.lines.add(S.lineIdx);
   clearTimeout(S.stallTimer);
+  clearTimeout(S.nudgeTimer);
 
   // 1) 还有没用过的线路
   let next = -1;
@@ -4315,7 +4375,8 @@ function onPlaybackError(reason) {
     if (!S.failover.lines.has(i)) { next = i; break; }
   }
   if (next >= 0) {
-    toast(`播放失败，切到线路「${S.lines[next].name}」`);
+    toast(`当前线路不可用，切到「${S.lines[next].name}」`);
+    say(`线路异常（${reason || 'fail'}），切换线路…`, 'loading');
     S.failover.busy = false;
     playEp(next, Math.min(S.epIdx, S.lines[next].episodes.length - 1), true);
     return;
@@ -4323,25 +4384,32 @@ function onPlaybackError(reason) {
 
   // 2) 本片所有线路都失败 → 去别的源找同名影片
   S.failover.sources.add(S.site.key);
-  autoSwitchSource();
+  autoSwitchSource(reason);
 }
 
 const normTitle = (s) => String(s || '')
   .replace(/[\s《》〈〉【】\[\]（）()：:·.,，。!！?？\-—_·"'"'']/g, '')
   .toLowerCase();
 
-async function autoSwitchSource() {
+async function autoSwitchSource(lastReason) {
   const item = S.item;
   if (!item) { S.failover.busy = false; return; }
   const epWanted = S.epIdx;
+  const switchToken = S.playToken;
   const target = normTitle(item.vod_name);
+  let expectedItem = item;
+  const cancelled = () => S.playToken !== switchToken || !$('#sheet')?.classList.contains('open') || S.item !== expectedItem;
+
+  setPlayerLoading(true, '当前片源播放失败，正在其他源查找…');
   toast('这个源放不了，正在其他源找…');
-  say('自动换源中…');
+  say(`自动换源中（${lastReason || '播放失败'}）…`, 'loading');
 
   for (const site of SITES) {
+    if (cancelled()) { S.failover.busy = false; return; }
     if (S.failover.sources.has(site.key)) continue;
     try {
-      const j = await cmsFetch(site, { ac: 'detail', wd: item.vod_name });
+      const j = await cmsFetch(site, { ac: 'detail', wd: item.vod_name }, { timeout: 16000 });
+      if (cancelled()) { S.failover.busy = false; return; }
       const list = pickList(j);
       if (!list.length) continue;
 
@@ -4352,12 +4420,34 @@ async function autoSwitchSource() {
         });
       if (!hit) continue;
 
+      // ac=detail 搜索结果通常已经自带 vod_play_url，直接复用，省掉一次慢速二次请求
+      const lines = parsePlayUrls(hit.vod_play_from, hit.vod_play_url);
       S.failover.sources.add(site.key);
       S.site = site;
       syncSrcLabel();
       toast(`在「${site.name}」找到了同名影片`);
 
-      await openDetail(hit.vod_id, false);
+      if (lines.length) {
+        S.item = hit;
+        expectedItem = hit;
+        paintDetailMeta(hit);
+        S.lines = lines;
+        const playable = S.lines.findIndex(l =>
+          l.episodes && l.episodes.some(e => e.url && /(\.m3u8|\.mp4)(\?|$)/i.test(e.url))
+        );
+        S.lineIdx = playable >= 0 ? playable : 0;
+        S.epIdx = -1;
+        renderLines();
+        renderEpisodes();
+      } else {
+        await openDetail(hit.vod_id, false);
+        if (S.playToken !== switchToken || !$('#sheet')?.classList.contains('open')) {
+          S.failover.busy = false;
+          return;
+        }
+        expectedItem = S.item;
+      }
+
       if (S.lines.length) {
         S.failover.lines = new Set();
         const li = S.lineIdx >= 0 && S.lineIdx < S.lines.length ? S.lineIdx : 0;
@@ -4373,8 +4463,12 @@ async function autoSwitchSource() {
     }
   }
 
-  toast('其他源也没找到这部片');
-  say('自动换源失败');
+  if (!cancelled()) {
+    setPlayerLoading(false);
+    const ov = $('#pOverlay'); if (ov) ov.classList.remove('hidden');
+    toast('其他片源也暂时无法播放，请稍后重试或切换线路');
+    say(`播放失败（${lastReason || '所有源均不可用'}）`, 'err');
+  }
   S.failover.busy = false;
 }
 
@@ -4420,7 +4514,7 @@ async function playEp(lineIdx, epIdx, isAuto) {
   const isDirect = /(\.m3u8|\.mp4)(\?|$)/i.test(url);
 
   // 有些线路给的是「/share/xxxx」这种网页解析页，不是视频流 —— 塞进 player 只会空转。
-  // 直接判失败，立刻走换线路，不让用户干等 8 秒。
+  // 直接判失败，立刻走换线路，不让用户干等。
   if (!isDirect && !/\/api\/hls\?/i.test(url)) {
     say('这条线路是网页解析地址，换下一条…', 'loading');
     onPlaybackError('not-media');
@@ -4428,15 +4522,15 @@ async function playEp(lineIdx, epIdx, isAuto) {
   }
 
   // ── 起播前预检 ──
-  // HLS 交给 hls.js 直接拉清单（manifestLoadingTimeOut=4s，失败即刻走 ERROR 回调），
-  // 省掉一次重复的 /api/hls 请求，降低起播延迟；仅对直链 .mp4 做 2 秒 Range 探测。
+  // HLS 交给 hls.js 直接拉清单（省掉一次重复的 /api/hls 请求）；仅对直链 .mp4 做 5 秒 Range 探测。
   if (!isM3u8 || !window.Hls || !window.Hls.isSupported()) {
     say(`检查线路「${line.name}」…`, 'loading');
     try {
       const chk = new AbortController();
-      const chkTimer = setTimeout(() => chk.abort(), 2000);
+      const chkTimer = setTimeout(() => chk.abort(), 5000);
       const pr = await fetch(API.proxy(url), { signal: chk.signal, headers: { Range: 'bytes=0-2048' } });
       clearTimeout(chkTimer);
+      if (token !== S.playToken) return;
       if (!pr.ok) {
         onPlaybackError('precheck:' + pr.status);
         return;
@@ -4453,30 +4547,31 @@ async function playEp(lineIdx, epIdx, isAuto) {
 
   if (isM3u8 && window.Hls && window.Hls.isSupported()) {
     const src = API.hls(url);
-    // 加大前向缓冲 + 开启下一分片预取 + 容忍 CMS 轻微 PTS 空洞，减少播放中卡顿加载
+    const isMob = inMobile() || document.body.dataset.real === 'mobile';
+    let mediaRecoveries = 0;
+    // 兼顾国内网络延迟容错与流畅缓冲（移动端控制 SourceBuffer 占用，避免 WebView QuotaExceededError）
     hls = new window.Hls({
-      maxBufferLength: 90,
-      maxMaxBufferLength: 180,
-      maxBufferSize: 90 * 1000 * 1000,
+      maxBufferLength: isMob ? 45 : 75,
+      maxMaxBufferLength: isMob ? 90 : 150,
+      maxBufferSize: (isMob ? 50 : 80) * 1000 * 1000,
       backBufferLength: 30,
       startFragPrefetch: true,
       maxBufferHole: 1.5,
       nudgeOffset: 0.2,
       nudgeMaxRetry: 6,
-      abrEwmaDefaultEstimate: 5000000,
-      manifestLoadingTimeOut: 4000,
-      manifestLoadingMaxRetry: 1,
-      manifestLoadingRetryDelay: 300,
-      levelLoadingTimeOut: 6000,
-      levelLoadingMaxRetry: 2,
-      levelLoadingRetryDelay: 300,
-      fragLoadingTimeOut: 8000,
-      fragLoadingMaxRetry: 3,
-      fragLoadingRetryDelay: 300,
-      fragLoadingMaxRetryTimeout: 4000,
+      abrEwmaDefaultEstimate: 3000000,
+      manifestLoadingTimeOut: 10000,
+      manifestLoadingMaxRetry: 2,
+      manifestLoadingRetryDelay: 500,
+      levelLoadingTimeOut: 10000,
+      levelLoadingMaxRetry: 3,
+      levelLoadingRetryDelay: 500,
+      fragLoadingTimeOut: 15000,
+      fragLoadingMaxRetry: 4,
+      fragLoadingRetryDelay: 500,
+      fragLoadingMaxRetryTimeout: 6000,
     });
     // 关键：hls.js 只负责把流灌进 <video>，不会自己 play。
-    // 少了这一句，表现就是「加载出来了但停在 0:00」。
     hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
       if (token !== S.playToken) return;
       vid.play().catch(() => {});
@@ -4491,7 +4586,13 @@ async function playEp(lineIdx, epIdx, isAuto) {
         }
         return;
       }
-      onPlaybackError('hls:' + data.type);
+      if (data.type === window.Hls.ErrorTypes.MEDIA_ERROR && mediaRecoveries < 2) {
+        mediaRecoveries++;
+        try { hls.recoverMediaError(); return; } catch (e) {}
+      }
+      const detail = data.details || data.type || 'error';
+      const code = data.response && data.response.code ? ':' + data.response.code : '';
+      onPlaybackError('hls:' + detail + code);
     });
   } else {
     vid.src = API.proxy(url);
@@ -4504,35 +4605,42 @@ async function playEp(lineIdx, epIdx, isAuto) {
     clearTimeout(S.stallTimer);
     S.stallTimer = setTimeout(() => {
       if (token !== S.playToken || vid.paused) return;
-      if (vid.readyState < 2 || vid.currentTime === 0 || vid.readyState < 3) {
+      if (vid.readyState < 2 || (vid.currentTime === 0 && vid.readyState < 3)) {
         onPlaybackError(label);
       }
     }, ms);
   };
 
-  armStall(8000, 'stalled');
+  armStall(15000, 'stalled');
 
   vid.addEventListener('canplay', () => {
     if (token !== S.playToken) return;
     clearTimeout(S.stallTimer);
+    clearTimeout(S.nudgeTimer);
     setPlayerLoading(false);
     say(`正在播放 · ${ep.label}`);
   }, { once: true, signal: ctl.signal });
 
-  // 播放中缓冲：仅在非暂停状态下计时，避免手动暂停误触发换源
+  // 播放中缓冲：7 秒轻推重拉，15 秒仍无进展才切换线路/换源
   vid.addEventListener('waiting', () => {
     if (token !== S.playToken || vid.paused) return;
     setPlayerLoading(true, '正在缓冲…');
+    clearTimeout(S.nudgeTimer);
     clearTimeout(S.stallTimer);
+    S.nudgeTimer = setTimeout(() => {
+      if (token !== S.playToken || vid.paused || vid.readyState >= 3) return;
+      if (hls) { try { hls.startLoad(); } catch (e) {} }
+    }, 7000);
     S.stallTimer = setTimeout(() => {
       if (token !== S.playToken || vid.paused) return;
       if (vid.readyState < 3) onPlaybackError('stalled-mid');
-    }, 12000);
+    }, 15000);
   }, { signal: ctl.signal });
 
   vid.addEventListener('playing', () => {
     if (token !== S.playToken) return;
     clearTimeout(S.stallTimer);
+    clearTimeout(S.nudgeTimer);
     setPlayerLoading(false);
   }, { signal: ctl.signal });
 
@@ -5165,15 +5273,21 @@ async function boot() {
   // 先把用户导入的片源注进来，再加载
   try { injectCustomSources(); } catch (e) {}
 
-  const ok = await loadHome(SITES[0]);
+  let ok = await loadHome(SITES[0], { timeout: 14000, silentFail: true });
   if (!ok) {
     for (let i = 1; i < SITES.length; i++) {
-      const r = await loadHome(SITES[i]);
-      if (r) { syncSrcLabel(); break; }
+      const r = await loadHome(SITES[i], { timeout: 12000, silentFail: true });
+      if (r) { ok = true; syncSrcLabel(); break; }
     }
   }
+  if (!ok) {
+    S.site = SITES[0];
+    syncSrcLabel();
+    const detail = S.lastErr || '请检查网络连接，或点下方切换其他片源';
+    say(`片源加载失败：${detail}`, 'err');
+    renderRowsError('暂时连不上内置片源', detail);
+  }
   renderNewHot = null;
-  if (window.lucide) { try { lucide.createIcons(); } catch (e) {} }
 }
 
 document.addEventListener('DOMContentLoaded', boot);
